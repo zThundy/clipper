@@ -1,0 +1,35 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  text-align: center;
+  margin: 2rem;
+}
+
+.textWhite {
+  color: var(--mui-palette-text-main);
+  font-style: italic;
+  font-size: 3rem;
+  margin: 1rem;
+}
+
+.textTwitch {
+  background: -webkit-linear-gradient(220deg, var(--mui-palette-primary-dark) 0%, var(--mui-palette-primary-dark) 40%, var(--mui-palette-accent-main) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 4rem;
+  margin: 1rem;
+  font-weight: bold;
+  transition: all .3s ease-in-out;
+}
+
+.textHighlight {
+  border-bottom: 1px solid var(--mui-palette-text-main);
+  transition: border-bottom .1s ease-in-out;
+  &:hover {
+    border-bottom: 5px solid var(--mui-palette-text-main);
+  }
+}

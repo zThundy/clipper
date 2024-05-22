@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 
 import { Container, Button, Avatar } from '@mui/material';
 import styled from '@emotion/styled';
+import { Dashboard } from '@mui/icons-material';
 
 const StyledHeaderContainer = styled(Container)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: {
@@ -80,7 +81,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
     animation: "gradient 8s infinite ease",
     padding: "1rem 2rem 1rem 2rem",
     borderRadius: "2rem",
-    border: "2px solid " + theme.vars.palette.primary.dark,
+    // border: "2px solid " + theme.vars.palette.primary.dark,
     fontSize: "1.2rem",
     fontWeight: "bold",
     transition: "color .4s, background-color .2s, border-radius .2s",
@@ -127,6 +128,7 @@ const StyledHeader = ({ }) => {
           disableElevation
           disableRipple
           disableFocusRipple
+          startIcon={<Dashboard />}
           onClick={() => {
             if (path === "/dashboard") return;
             window.location.href = "/dashboard";

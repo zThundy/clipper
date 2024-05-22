@@ -1,0 +1,26 @@
+.clipsContainer {
+  width: calc(100% - 2rem);
+  height: 100%;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.clipContainer {
+  cursor: pointer;
+}
+
+.clip {
+  cursor: pointer;
+  margin: 1rem 2rem 1rem 2rem;
+  padding: 0;
+  /* background-color: var(--mui-palette-secondary-dark); */
+  border-radius: .4rem;
+  background-color: red;
+}
+
+.clipTitle {
+  padding: 0 0 0 2rem;
+}

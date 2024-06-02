@@ -118,8 +118,8 @@ const StyledHeader = ({ }) => {
           <span>Clipper</span>
         </StyledTitle>
         <StyledNav>
-          {path === "/" ? <a href="#features">Guide</a> : null}
-          {path === "/" ? <a href="#pricing">FAQ</a> : null}
+          {path === "/" ? <a href="#features">Features</a> : null}
+          {path === "/" ? <a href="#about">About</a> : null}
           {path === "/" ? <a href="#contact">Premium ✦</a> : null}
         </StyledNav>
         <StyledButton

@@ -2,9 +2,9 @@
 
 import { useMemo, useState, useEffect } from "react";
 import style from "./page.module.css";
-import { Button, ButtonGroup, Checkbox, FormControlLabel, styled } from "@mui/material";
+import { Button, ButtonGroup, Checkbox, FormControlLabel, Switch, styled, Snackbar, Alert } from "@mui/material";
 import Image from "next/image";
-import { ArrowBack, ArrowForward, Delete, Download } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, Delete, Download, Home } from "@mui/icons-material";
 
 const StyledPageButton = styled(Button)(({ theme }) => ({
   color: theme.vars.palette.text.main,
@@ -82,44 +82,116 @@ function Dashboard({ }) {
   const [selectAll, setSelectAll] = useState(false);
   const [clips, setClips] = useState(_clips);
 
+  const [open, setOpen] = useState(false);
+  const [notifMessage, setNotifMessage] = useState("");
+  const [notifType, setNotifType] = useState("info");
+
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteEnabled, setDeleteEnabled] = useState(false);
+
+  const handleClose = (e, reason) => {
+    if (reason === 'clickaway') return;
+    setOpen(false);
+  };
+
+  const handleOpen = (message) => {
+    setOpen(true);
+    setNotifMessage(message);
+  };
 
   return (
     <>
+      <Snackbar
+        open={open}
+        autoHideDuration={5000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleClose}
+          severity={notifType}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {notifMessage}
+        </Alert>
+      </Snackbar>
+
       <div className={style.header}>
-        <div className={style.selectAllContainer}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                color="secondary"
-                checked={selectAll}
-              />
-            }
-            onChange={() => {
-              _clips.forEach(_ => _.checked = !selectAll);
-              setSelectAll(!selectAll);
+        <div style={{
+          display: "flex",
+          flexDirection: "row",
+          margin: "0 0 0 1rem",
+        }}>
+          <Button
+            className={style.homeButton}
+            color="primary"
+            varuant="contained"
+            onClick={() => {
+              window.location.href = "/";
             }}
-            label="Select all"
-          />
+          >
+            <Home />
+          </Button>
+
+          <div className={style.selectAllContainer}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  color="secondary"
+                  checked={selectAll}
+                />
+              }
+              onChange={() => {
+                _clips.forEach(_ => _.checked = !selectAll);
+                setSelectAll(!selectAll);
+              }}
+              label="Select all"
+            />
+          </div>
         </div>
 
         <div
           style={{
-            margin: "0 1rem 0 0"
+            margin: "0 1rem 0 0",
+            display: "flex",
+            flexDirection: "row",
           }}
         >
           <Button
             className={style.downloadButton}
             startIcon={<Download />}
+            onClick={() => {
+              let selectedClips = _clips.filter(_ => _.checked);
+              if (selectedClips.length === 0) {
+                setNotifType("error");
+                handleOpen("No clips selected for download.");
+                return;
+              }
+
+              let urls = selectedClips.map(_ => _.url);
+              setNotifType("success");
+              handleOpen(`Downloading ${urls.length} clips...`);
+              // deselect all clips
+              _clips.forEach(_ => _.checked = false);
+              console.log(urls);
+              setSelectAll(false);
+            }}
           >
             Download
           </Button>
-          <div className={style.enableDeleteContainer}>
-            
-          </div>
+
+          <Switch
+            color="error"
+            onChange={() => {
+              setDeleteEnabled(!deleteEnabled);
+            }}
+          ></Switch>
+
           <Button
             className={style.deleteButton}
             startIcon={<Delete />}
+            disabled={!deleteEnabled}
           >
             Delete
           </Button>
@@ -139,7 +211,7 @@ function Dashboard({ }) {
             onClick={() => {
               if (currentPage === 1) return;
               setCurrentPage(currentPage - 1)
-              window.scrollTo(0, 0);
+              // window.scrollTo(0, 0);
             }}
           ><ArrowBack /></StyledPageButton>
           {useMemo(() => {
@@ -154,7 +226,7 @@ function Dashboard({ }) {
                     setCurrentPage(i);
                     window.scrollTo(0, 0);
                   }}
-                  sx={ currentPage === i ? { color: "var(--mui-palette-primary-dark)" } : {}}
+                  sx={currentPage === i ? { color: "var(--mui-palette-primary-dark)" } : {}}
                 >
                   {i}
                 </StyledPageButton>
@@ -166,7 +238,7 @@ function Dashboard({ }) {
             onClick={() => {
               if (currentPage === Math.ceil(clips.length / 12)) return;
               setCurrentPage(currentPage + 1)
-              window.scrollTo(0, 0);
+              // window.scrollTo(0, 0);
             }}
           ><ArrowForward /></StyledPageButton>
         </ButtonGroup>

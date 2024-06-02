@@ -18,12 +18,21 @@
   }
 }
 
+.homeButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--mui-palette-background-light);
+  border-radius: .2rem;
+  cursor: pointer;
+}
+
 .selectAllContainer {
   user-select: none;
   background-color: var(--mui-palette-background-light);
   padding: 0 0 0 1rem;
   margin: 0 0 0 1rem;
-  border-radius: .3rem;
+  border-radius: .2rem;
 
   & span {
     font-weight: bold;
@@ -122,4 +131,14 @@
   -webkit-box-sizing: border-box;
   border: .5rem solid var(--mui-palette-primary-main);
   animation: checked .1s;
+}
+
+.enableDeleteContainer {
+  display: flex;
+  border: .1rem solid var(--mui-palette-error-main);
+  animation: checked .1s;
+  border-radius: .2rem;
+  padding: 0 .5rem 0 1rem;
+  justify-content: center;
+  align-items: center;
 }

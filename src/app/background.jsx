@@ -86,9 +86,10 @@ function Background({ }) {
         }}
       ></SecondRound>
 
-      <StyledBackground>
-        <StyledImg src="wave.svg" alt="wave" />
-      </StyledBackground>
+        <StyledImg src="wave.svg" alt="wave" style={{
+          position: "absolute",
+          // top: "20rem",
+        }} />
     </div>
   );
 }

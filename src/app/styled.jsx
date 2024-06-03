@@ -131,7 +131,8 @@ const StyledHeader = ({ }) => {
           startIcon={<Dashboard />}
           onClick={() => {
             if (path === "/dashboard") return;
-            window.location.href = "/dashboard";
+            // open link in a new page
+            window.open("/api/login", "_blank");
           }}
         >Dashboard</StyledButton>
       </StyledHeaderContainer>

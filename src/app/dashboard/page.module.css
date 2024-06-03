@@ -78,8 +78,11 @@
 }
 
 .clipCheckbox {
-  padding: 1rem;
+  margin: 1rem;
   position: absolute;
+  background-color: var(--mui-palette-text-darker);
+  border-radius: .2rem;
+  padding: .2rem;
 }
 
 .clipContainer {
@@ -90,7 +93,9 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  width: 27rem;
+  width: 24rem;
+  height: 16rem;
+  margin: 3rem;
   line-break: normal;
   justify-content: space-between;
 }
@@ -105,13 +110,14 @@
   position: relative;
   align-self: flex-start;
   color: var(--mui-palette-text-dark);
-  border-bottom: 2px solid var(--mui-palette-text-dark);
   transition: color .1s, border-bottom .1s ease-in-out;
   cursor: text;
+  transition: border-bottom .1s ease-in-out;
+  border-bottom: 2px solid var(--mui-palette-text-dark);
 
   &:hover {
-    color: var(--mui-palette-text-main);
     border-bottom: 2px solid var(--mui-palette-text-main);
+    color: var(--mui-palette-text-main);
   }
 }
 

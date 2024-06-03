@@ -28,6 +28,7 @@ const theme = extendTheme({
       light: 'rgb(255, 255, 255)',
       dark: 'rgb(200, 200, 200)',
       darker: 'rgb(150, 150, 150)',
+      lightgray: 'rgb(120, 120, 120)',
       gray: 'rgb(60, 60, 60)',
       darkgray: 'rgb(40, 40, 40)',
       black: 'rgb(0, 0, 0)'

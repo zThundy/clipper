@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import style from "./page.module.css";
-import { Button, ButtonGroup, Checkbox, FormControlLabel, Switch, styled, Snackbar, Alert } from "@mui/material";
+import { useMemo, useState, useEffect, use } from "react";
+import { Button, ButtonGroup, Checkbox, FormControlLabel, Switch, styled, Snackbar, Alert, Modal, Zoom } from "@mui/material";
 import Image from "next/image";
-import { ArrowBack, ArrowForward, Delete, Download, Home } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, Delete, Download, Home, Info } from "@mui/icons-material";
+
+import style from "./page.module.css";
+import modal from "./page.modal.module.css";
 
 const StyledPageButton = styled(Button)(({ theme }) => ({
   color: theme.vars.palette.text.main,
@@ -20,54 +22,64 @@ const StyledPageButton = styled(Button)(({ theme }) => ({
 
 }));
 
-let _clips = []
-for (var i = 0; i < 1325; i++) {
-  _clips.push({
-    title: `Clip ${i + 1}`,
-    image: `https://picsum.photos/420/280?random=${i + 1}`,
-    url: `https://picsum.photos/420/280?random=${i + 1}`,
-    checked: false
-  });
-}
+const clipsDimenstions = {
+  width: 380,
+  height: 220
+};
 
-function Clip({ clip, clipIndex, page }) {
+const clipsPerPage = 21;
+
+function Clip({ clip, openModal, _ }) {
   const [_clip, setClip] = useState(clip);
-  const [checked, setChecked] = useState(clip.checked || false);
+  const [checked, setChecked] = useState(clip.checked);
+
+  // const checked = useMemo(() => { return _clip.checked || false; }, [_clip.checked]);
+
+  // const [checked, setChecked] = useState(clip.checked || false);
 
   useEffect(() => {
     setChecked(clip.checked);
-  }, [clip.checked]);
-
-  useEffect(() => {
     setClip(clip);
   }, [clip]);
+
+  const _click = () => {
+    _clip.checked = !_clip.checked;
+    setChecked(_clip.checked);
+    setClip(_clip);
+    _();
+  }
 
   return (
     <div className={style.clipContainer} data-checked={checked} data-link={clip.url} data-title={clip.title}>
       <div className={style.clip}>
-        <div
-          className={style.clipImage}
-          onClick={() => {
-            _clip.checked = !_clip.checked;
-            setChecked(_clip.checked);
-            setClip(_clip);
-          }}
-        >
+        <div className={style.clipImage}>
           <Checkbox
             color="primary"
             className={style.clipCheckbox}
             checked={checked}
             data-checked={checked}
+            onClick={_click}
           />
 
           <Image
-            src={_clip.image}
+            src={_clip.thumbnail_url.replace("%{width}", clipsDimenstions.width).replace("%{height}", clipsDimenstions.height)}
             alt={_clip.title}
             className={checked ? style.clipImageChecked : null}
-            width={420}
-            height={280}
+            width={clipsDimenstions.width}
+            height={clipsDimenstions.height}
             draggable={false}
+            onClick={_click}
           />
+
+          <div
+            className={modal.clipInfoButton}
+            onClick={() => {
+              // open mui modal with the clip info
+              openModal(_clip);
+            }}
+          >
+            <Info />
+          </div>
 
           <div className={style.clipTitle}>
             {_clip.title}
@@ -80,7 +92,8 @@ function Clip({ clip, clipIndex, page }) {
 
 function Dashboard({ }) {
   const [selectAll, setSelectAll] = useState(false);
-  const [clips, setClips] = useState(_clips);
+  const [clips, setClips] = useState([]);
+  const [modalData, setModalData] = useState(null);
 
   const [open, setOpen] = useState(false);
   const [notifMessage, setNotifMessage] = useState("");
@@ -99,6 +112,40 @@ function Dashboard({ }) {
     setNotifMessage(message);
   };
 
+  useEffect(() => {
+    if (currentPage <= 1) {
+      localStorage.setItem("cursor", JSON.stringify({
+        page: 1,
+        cursor: "null"
+      }));
+    }
+
+    // get the clips on page load using the api call /api/get-clips
+    fetch(`http://localhost:3000/api/get-clips?cursor=${JSON.parse(localStorage.getItem("cursor")).cursor}`)
+      .then(res => res.json())
+      .then(data => {
+        // save cursor in localStorage with the page number
+        localStorage.setItem("cursor", JSON.stringify({
+          page: currentPage,
+          cursor: data.pagination.cursor
+        }));
+        // add the result to the clips array
+        setClips((prev) => {
+          data.data.forEach(_ => _.checked = false);
+          if (selectAll) data.data.forEach(_ => _.checked = true);
+
+          // check if the clip id is already in the clips array
+          let newClips = data.data.filter(_ => !prev.some(clip => clip.id === _.id));
+          return [...prev, ...newClips];
+        });
+      })
+      .catch(err => {
+        setNotifType("error");
+        handleOpen(`Failed to fetch clips. Error: ${err.message}`);
+        setClips([]);
+      });
+  }, [currentPage]);
+
   return (
     <>
       <Snackbar
@@ -116,6 +163,16 @@ function Dashboard({ }) {
           {notifMessage}
         </Alert>
       </Snackbar>
+
+      <Modal
+        open={modalData !== null}
+        onClose={() => setModalData(null)}
+        className={modal.modalContainer}
+      >
+        <div className={modal.modalStuffBg}>
+
+        </div>
+      </Modal>
 
       <div className={style.header}>
         <div style={{
@@ -143,7 +200,8 @@ function Dashboard({ }) {
                 />
               }
               onChange={() => {
-                _clips.forEach(_ => _.checked = !selectAll);
+                clips.forEach(_ => _.checked = !selectAll);
+                setClips(clips);
                 setSelectAll(!selectAll);
               }}
               label="Select all"
@@ -162,7 +220,7 @@ function Dashboard({ }) {
             className={style.downloadButton}
             startIcon={<Download />}
             onClick={() => {
-              let selectedClips = _clips.filter(_ => _.checked);
+              let selectedClips = clips.filter(_ => _.checked);
               if (selectedClips.length === 0) {
                 setNotifType("error");
                 handleOpen("No clips selected for download.");
@@ -173,7 +231,7 @@ function Dashboard({ }) {
               setNotifType("success");
               handleOpen(`Downloading ${urls.length} clips...`);
               // deselect all clips
-              _clips.forEach(_ => _.checked = false);
+              clips.forEach(_ => _.checked = false);
               console.log(urls);
               setSelectAll(false);
             }}
@@ -199,10 +257,26 @@ function Dashboard({ }) {
       </div>
 
       <div className={style.clipsContainer}>
-        {/* show max 12 clips per page */}
-        {clips.slice((currentPage - 1) * 12, currentPage * 12).map((clip, index) => (
-          <Clip key={index} clip={clip} clipIndex={index} page={currentPage} />
-        ))}
+        {
+          useMemo(() => {
+            return clips
+              .slice((currentPage - 1) * clipsPerPage, currentPage * clipsPerPage)
+              .map((clip, index) => (
+                <Clip
+                  key={index}
+                  checked={clip.checked}
+                  clip={clip}
+                  openModal={(__clip) => {
+                    setModalData(__clip);
+                  }}
+                  _={() => {
+                    // log all checked clips
+                    console.log(clips.filter(_ => _.checked));
+                  }}
+                />
+              ));
+          }, [selectAll, clips, currentPage])
+        }
       </div>
 
       <div className={style.pageSelector}>
@@ -218,7 +292,7 @@ function Dashboard({ }) {
             let pages = [];
             const maxButtons = 5;
             // show only a maximum of 5 pages at a time
-            for (let i = Math.max(1, currentPage - maxButtons); i <= Math.min(Math.ceil(clips.length / 12), currentPage + maxButtons); i++) {
+            for (let i = Math.max(1, currentPage - maxButtons); i <= Math.min(Math.ceil(clips.length / clipsPerPage), currentPage + maxButtons); i++) {
               pages.push(
                 <StyledPageButton
                   key={i}
@@ -236,8 +310,10 @@ function Dashboard({ }) {
           }, [clips, currentPage])}
           <StyledPageButton
             onClick={() => {
-              if (currentPage === Math.ceil(clips.length / 12)) return;
-              setCurrentPage(currentPage + 1)
+              // if there is a cursor in localStorage, show the next page button
+              if (localStorage.getItem("cursor").cursor !== "null") return setCurrentPage(currentPage + 1);
+              if (currentPage === Math.ceil(clips.length / clipsPerPage)) return;
+              setCurrentPage(currentPage + 1);
               // window.scrollTo(0, 0);
             }}
           ><ArrowForward /></StyledPageButton>

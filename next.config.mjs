@@ -6,12 +6,11 @@ nextConfig.images = {
   remotePatterns: [
     {
       // match any image URL on a domain
-      hostname: "via.placeholder.com",
+      hostname: "static-cdn.jtvnw.net",
     },
     {
-      // match any image URL on a domain
-      hostname: "picsum.photos",
-    },
+      hostname: "clips-media-assets2.twitch.tv"
+    }
   ],
   deviceSizes: [320, 420, 768, 1024, 1200],
   imageSizes: [16, 32, 48, 64, 96],

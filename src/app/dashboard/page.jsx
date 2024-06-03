@@ -114,16 +114,17 @@ function Dashboard({ }) {
 
   useEffect(() => {
     let cursors = JSON.parse(localStorage.getItem("cursors")) || {};
-    let localStartCursor = cursors[currentPage]?.start || null;
-    let localEndCursor = cursors[currentPage]?.end || null;
+    // get the cursor for the previous page
+    let cursor = cursors[currentPage - 3] || "null";
+    // if the page is odd, the cursor is forced to null so we don't fetch shit
+    if (currentPage !== 1 && currentPage % 4 !== 0) return;
 
     // get the clips on page load using the api call /api/get-clips
-    fetch(`http://localhost:3000/api/get-clips?cursor=${localEndCursor}`)
+    fetch(`/api/get-clips?cursor=${cursor}`)
       .then(res => res.json())
       .then(data => {
         // save cursors in localStorage with the page number
-        cursors[currentPage] = { start: localStartCursor, end: data.pagination?.cursor };
-        cursors[currentPage + 1] = { start: localStartCursor, end: data.pagination?.cursor };
+        cursors[currentPage] = data.pagination?.cursor || "null";
         localStorage.setItem("cursors", JSON.stringify(cursors));
 
         // add the result to the clips array
@@ -138,7 +139,7 @@ function Dashboard({ }) {
       })
       .catch(err => {
         setNotifType("error");
-        handleOpen(`Failed to fetch clips. Error: ${err.message}`);
+        handleOpen(`Failed to fetch clips. Error: ${err}`);
         setClips([]);
       });
   }, [currentPage]);
@@ -167,7 +168,16 @@ function Dashboard({ }) {
         className={modal.modalContainer}
       >
         <div className={modal.modalStuffBg}>
-
+          <iframe
+            src={modalData?.embed_url}
+            frameborder="0"
+            allowfullscreen="false"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
+            security="restricted"
+            height="378"
+            width="620"
+          >
+          </iframe>
         </div>
       </Modal>
 

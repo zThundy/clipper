@@ -30,36 +30,35 @@ export default async function handler(
 ) {
     if (req.method === 'GET') {
         // get the page number from the url query
-        // const page = req.query.page as string || '1'
         const cursor = req.query.cursor as string || ''
         const { access_token, refresh_token, user_id } = parseCookies(req)
 
         if (!access_token || !refresh_token) {
-            res.status(401).json({ message: 'Unauthorized' } as any)
-            return
+            res.status(401).send("Unauthorized" as any);
+            return;
         }
 
         try {
             const data = await getClips(access_token, user_id, cursor);
-            res.status(200).json(data)
+            res.status(200).json(data);
         } catch (error: any) {
             if (error.message === 'Access token expired') {
                 // The access token is expired, use the refresh token to get a new one
-                const newAccessToken = await refreshAccessToken(refresh_token)
+                const newAccessToken = await refreshAccessToken(refresh_token);
 
                 // Save the new access token in a cookie
                 const expiryDate = new Date(Date.now() + 60 * 60 * 1000).toUTCString() // 1 hour from now
-                res.setHeader('Set-Cookie', `access_token=${newAccessToken}; Path=/; HttpOnly; Expires=${expiryDate}`)
+                res.setHeader('Set-Cookie', `access_token=${newAccessToken}; Path=/; HttpOnly; Expires=${expiryDate}`);
 
                 // Retry the request to get the clips
                 const data = await getClips(newAccessToken, user_id, cursor);
-                res.status(200).json(data)
+                res.status(200).json(data);
             } else {
-                res.status(500).json({ message: error.message } as any)
+                res.status(500).send(error.message as any);
             }
         }
     } else {
-        res.status(405).json({ message: 'Method not allowed' } as any)
+        res.status(405).send("Method not allowed" as any);
     }
 }
 
@@ -79,7 +78,7 @@ async function getClips(access_token: string, user_id: string, cursor: ClipData[
         'Client-Id': process.env.TWITCH_CLIENT_ID || '',
     });
 
-    const baseUrl = `https://api.twitch.tv/helix/clips?broadcaster_id=${user_id}&first=42`
+    const baseUrl = `https://api.twitch.tv/helix/clips?broadcaster_id=${user_id}&first=84`
     const url = cursor !== "null" ? `${baseUrl}&after=${cursor}` : baseUrl
     const response = await fetch(url, { headers });
 
@@ -93,6 +92,7 @@ async function getClips(access_token: string, user_id: string, cursor: ClipData[
 
     const data = await response.json()
     // console.log("currentCursor", data.pagination.cursor, "passedCursor", cursor);
+    // console.log("data", data);
     return data
 }
 

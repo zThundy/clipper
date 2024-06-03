@@ -79,7 +79,7 @@ async function getClips(access_token: string, user_id: string, cursor: ClipData[
         'Client-Id': process.env.TWITCH_CLIENT_ID || '',
     });
 
-    const baseUrl = `https://api.twitch.tv/helix/clips?broadcaster_id=${user_id}&first=21`
+    const baseUrl = `https://api.twitch.tv/helix/clips?broadcaster_id=${user_id}&first=42`
     const url = cursor !== "null" ? `${baseUrl}&after=${cursor}` : baseUrl
     const response = await fetch(url, { headers });
 

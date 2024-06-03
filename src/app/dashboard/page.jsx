@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, use } from "react";
-import { Button, ButtonGroup, Checkbox, FormControlLabel, Switch, styled, Snackbar, Alert, Modal, Zoom } from "@mui/material";
+import { Button, ButtonGroup, Checkbox, FormControlLabel, Switch, styled, Snackbar, Alert, Modal, Zoom, Pagination } from "@mui/material";
 import Image from "next/image";
 import { ArrowBack, ArrowForward, Delete, Download, Home, Info } from "@mui/icons-material";
 
@@ -113,22 +113,19 @@ function Dashboard({ }) {
   };
 
   useEffect(() => {
-    if (currentPage <= 1) {
-      localStorage.setItem("cursor", JSON.stringify({
-        page: 1,
-        cursor: "null"
-      }));
-    }
+    let cursors = JSON.parse(localStorage.getItem("cursors")) || {};
+    let localStartCursor = cursors[currentPage]?.start || null;
+    let localEndCursor = cursors[currentPage]?.end || null;
 
     // get the clips on page load using the api call /api/get-clips
-    fetch(`http://localhost:3000/api/get-clips?cursor=${JSON.parse(localStorage.getItem("cursor")).cursor}`)
+    fetch(`http://localhost:3000/api/get-clips?cursor=${localEndCursor}`)
       .then(res => res.json())
       .then(data => {
-        // save cursor in localStorage with the page number
-        localStorage.setItem("cursor", JSON.stringify({
-          page: currentPage,
-          cursor: data.pagination.cursor
-        }));
+        // save cursors in localStorage with the page number
+        cursors[currentPage] = { start: localStartCursor, end: data.pagination?.cursor };
+        cursors[currentPage + 1] = { start: localStartCursor, end: data.pagination?.cursor };
+        localStorage.setItem("cursors", JSON.stringify(cursors));
+
         // add the result to the clips array
         setClips((prev) => {
           data.data.forEach(_ => _.checked = false);
@@ -280,7 +277,7 @@ function Dashboard({ }) {
       </div>
 
       <div className={style.pageSelector}>
-        <ButtonGroup>
+        {/* <ButtonGroup>
           <StyledPageButton
             onClick={() => {
               if (currentPage === 1) return;
@@ -317,7 +314,17 @@ function Dashboard({ }) {
               // window.scrollTo(0, 0);
             }}
           ><ArrowForward /></StyledPageButton>
-        </ButtonGroup>
+        </ButtonGroup> */}
+
+        <Pagination
+          count={Math.ceil(clips.length / clipsPerPage)}
+          page={currentPage}
+          showFirstButton
+          showLastButton
+          onChange={(_, page) => {
+            setCurrentPage(page);
+          }}
+        />
       </div>
     </>
   );

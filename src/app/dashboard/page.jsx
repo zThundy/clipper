@@ -1,26 +1,27 @@
 "use client";
 
-import { useMemo, useState, useEffect, use } from "react";
-import { Button, ButtonGroup, Checkbox, FormControlLabel, Switch, styled, Snackbar, Alert, Modal, Zoom, Pagination } from "@mui/material";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { Button, Checkbox, FormControlLabel, Switch, Snackbar, Alert, Modal, Pagination } from "@mui/material";
 import Image from "next/image";
-import { ArrowBack, ArrowForward, Delete, Download, Home, Info } from "@mui/icons-material";
+import { Delete, Download, Home, Info } from "@mui/icons-material";
+
+import ModalContent from "./modal.content";
 
 import style from "./page.module.css";
 import modal from "./page.modal.module.css";
 
-const StyledPageButton = styled(Button)(({ theme }) => ({
-  color: theme.vars.palette.text.main,
-  backgroundColor: theme.vars.palette.primary.main,
-  fontWeight: "bold",
-  fontSize: "1.2rem",
-  borderRadius: "1rem",
-  padding: ".5rem 1rem .5rem 1rem",
-  transition: "border-radius .2s, color .2s",
-  "&:hover": {
-    backgroundColor: theme.vars.palette.primary.light,
-  }
-
-}));
+// const StyledPageButton = styled(Button)(({ theme }) => ({
+//   color: theme.vars.palette.text.main,
+//   backgroundColor: theme.vars.palette.primary.main,
+//   fontWeight: "bold",
+//   fontSize: "1.2rem",
+//   borderRadius: "1rem",
+//   padding: ".5rem 1rem .5rem 1rem",
+//   transition: "border-radius .2s, color .2s",
+//   "&:hover": {
+//     backgroundColor: theme.vars.palette.primary.light,
+//   }
+// }));
 
 const clipsDimenstions = {
   width: 380,
@@ -102,23 +103,14 @@ function Dashboard({ }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteEnabled, setDeleteEnabled] = useState(false);
 
-  const handleClose = (e, reason) => {
-    if (reason === 'clickaway') return;
-    setOpen(false);
-  };
-
-  const handleOpen = (message) => {
-    setOpen(true);
-    setNotifMessage(message);
-  };
-
   useEffect(() => {
-    let cursors = JSON.parse(localStorage.getItem("cursors")) || {};
-    // get the cursor for the previous page
-    let cursor = cursors[currentPage - 3] || "null";
+    console.log("fetching clips... or changing page...");
     // if the page is odd, the cursor is forced to null so we don't fetch shit
     if (currentPage !== 1 && currentPage % 4 !== 0) return;
 
+    let cursors = JSON.parse(localStorage.getItem("cursors")) || {};
+    // get the cursor for the previous page
+    let cursor = cursors[currentPage - 3] || "null";
     // get the clips on page load using the api call /api/get-clips
     fetch(`/api/get-clips?cursor=${cursor}`)
       .then(res => res.json())
@@ -144,6 +136,16 @@ function Dashboard({ }) {
       });
   }, [currentPage]);
 
+  const handleClose = (e, reason) => {
+    if (reason === 'clickaway') return;
+    setOpen(false);
+  };
+
+  const handleOpen = (message) => {
+    setOpen(true);
+    setNotifMessage(message);
+  };
+
   return (
     <>
       <Snackbar
@@ -167,18 +169,7 @@ function Dashboard({ }) {
         onClose={() => setModalData(null)}
         className={modal.modalContainer}
       >
-        <div className={modal.modalStuffBg}>
-          <iframe
-            src={modalData?.embed_url}
-            frameborder="0"
-            allowfullscreen="false"
-            sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
-            security="restricted"
-            height="378"
-            width="620"
-          >
-          </iframe>
-        </div>
+        <ModalContent clip={modalData} />
       </Modal>
 
       <div className={style.header}>

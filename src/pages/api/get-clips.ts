@@ -43,6 +43,8 @@ export default async function handler(
             res.status(200).json(data);
         } catch (error: any) {
             if (error.message === 'Access token expired') {
+                console.log('Access token expired');
+
                 // The access token is expired, use the refresh token to get a new one
                 const newAccessToken = await refreshAccessToken(refresh_token);
 
@@ -54,6 +56,7 @@ export default async function handler(
                 const data = await getClips(newAccessToken, user_id, cursor);
                 res.status(200).json(data);
             } else {
+                console.error(error);
                 res.status(500).send(error.message as any);
             }
         }
@@ -78,7 +81,7 @@ async function getClips(access_token: string, user_id: string, cursor: ClipData[
         'Client-Id': process.env.TWITCH_CLIENT_ID || '',
     });
 
-    const baseUrl = `https://api.twitch.tv/helix/clips?broadcaster_id=${user_id}&first=84`
+    const baseUrl = `https://api.twitch.tv/helix/clips?broadcaster_id=${user_id}&first=${process.env.MAX_CLIPS_NUMBER}`
     const url = cursor !== "null" ? `${baseUrl}&after=${cursor}` : baseUrl
     const response = await fetch(url, { headers });
 
@@ -87,6 +90,7 @@ async function getClips(access_token: string, user_id: string, cursor: ClipData[
             throw new Error('Access token expired');
         }
 
+        console.log(response.status, response.statusText);
         throw new Error('Failed to get clips');
     }
 

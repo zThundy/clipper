@@ -32,7 +32,7 @@ const clipsPerPage = 21;
 
 function Clip({ clip, openModal, _ }) {
   const [_clip, setClip] = useState(clip);
-  const [checked, setChecked] = useState(clip.checked);
+  const [checked, setChecked] = useState(clip.checked || false);
 
   // const checked = useMemo(() => { return _clip.checked || false; }, [_clip.checked]);
 
@@ -41,7 +41,7 @@ function Clip({ clip, openModal, _ }) {
   useEffect(() => {
     setChecked(clip.checked);
     setClip(clip);
-  }, [clip]);
+  }, [clip.checked, clip]);
 
   const _click = () => {
     _clip.checked = !_clip.checked;
@@ -105,36 +105,31 @@ function Dashboard({ }) {
 
   useEffect(() => {
     console.log("fetching clips... or changing page...");
-    // if the page is odd, the cursor is forced to null so we don't fetch shit
-    if (currentPage !== 1 && currentPage % 4 !== 0) return;
 
-    let cursors = JSON.parse(localStorage.getItem("cursors")) || {};
-    // get the cursor for the previous page
-    let cursor = cursors[currentPage - 3] || "null";
     // get the clips on page load using the api call /api/get-clips
-    fetch(`/api/get-clips?cursor=${cursor}`)
-      .then(res => res.json())
+    fetch(`/api/get-clips`)
+      .then(async res => {
+        if (!res.ok) throw await res.json();
+        return res.json();
+      })
       .then(data => {
-        // save cursors in localStorage with the page number
-        cursors[currentPage] = data.pagination?.cursor || "null";
-        localStorage.setItem("cursors", JSON.stringify(cursors));
+        if (!data) throw new Error("No data found in the response");
+        console.log(data);
 
         // add the result to the clips array
         setClips((prev) => {
-          data.data.forEach(_ => _.checked = false);
-          if (selectAll) data.data.forEach(_ => _.checked = true);
-
-          // check if the clip id is already in the clips array
-          let newClips = data.data.filter(_ => !prev.some(clip => clip.id === _.id));
-          return [...prev, ...newClips];
+          if (selectAll) data.forEach(_ => _.checked = true);
+          else data.forEach(_ => _.checked = false);
+          return data;
         });
       })
       .catch(err => {
         setNotifType("error");
-        handleOpen(`Failed to fetch clips. Error: ${err}`);
+        handleOpen(`Error: ${err.message}`);
+        if (err.redirect) window.location.href = err.redirectPath;
         setClips([]);
       });
-  }, [currentPage]);
+  }, []);
 
   const handleClose = (e, reason) => {
     if (reason === 'clickaway') return;
@@ -278,50 +273,13 @@ function Dashboard({ }) {
       </div>
 
       <div className={style.pageSelector}>
-        {/* <ButtonGroup>
-          <StyledPageButton
-            onClick={() => {
-              if (currentPage === 1) return;
-              setCurrentPage(currentPage - 1)
-              // window.scrollTo(0, 0);
-            }}
-          ><ArrowBack /></StyledPageButton>
-          {useMemo(() => {
-            let pages = [];
-            const maxButtons = 5;
-            // show only a maximum of 5 pages at a time
-            for (let i = Math.max(1, currentPage - maxButtons); i <= Math.min(Math.ceil(clips.length / clipsPerPage), currentPage + maxButtons); i++) {
-              pages.push(
-                <StyledPageButton
-                  key={i}
-                  onClick={() => {
-                    setCurrentPage(i);
-                    window.scrollTo(0, 0);
-                  }}
-                  sx={currentPage === i ? { color: "var(--mui-palette-primary-dark)" } : {}}
-                >
-                  {i}
-                </StyledPageButton>
-              );
-            }
-            return pages;
-          }, [clips, currentPage])}
-          <StyledPageButton
-            onClick={() => {
-              // if there is a cursor in localStorage, show the next page button
-              if (localStorage.getItem("cursor").cursor !== "null") return setCurrentPage(currentPage + 1);
-              if (currentPage === Math.ceil(clips.length / clipsPerPage)) return;
-              setCurrentPage(currentPage + 1);
-              // window.scrollTo(0, 0);
-            }}
-          ><ArrowForward /></StyledPageButton>
-        </ButtonGroup> */}
-
         <Pagination
           count={Math.ceil(clips.length / clipsPerPage)}
           page={currentPage}
           showFirstButton
           showLastButton
+          color="primary"
+          size="large"
           onChange={(_, page) => {
             setCurrentPage(page);
           }}

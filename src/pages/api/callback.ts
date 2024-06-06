@@ -11,13 +11,14 @@ export default async function handler(
   res: NextApiResponse<ResponseData>
 ) {
   if (req.method === 'GET') {
-    console.log('req.headers.host', req.headers.host)
-    console.log('req.query.code', req.query.code)
+    // console.log('req.headers.host', req.headers.host)
+    // console.log('req.query.code', req.query.code)
 
     const code = req.query.code as string
 
     if (!code) {
-      res.status(400).json({ message: 'Authorization code is required' })
+      // res.status(400).json({ message: 'Authorization code is required' });
+      res.status(308).redirect('/');
       return
     }
 
@@ -43,7 +44,7 @@ export default async function handler(
       }
 
       const { access_token, refresh_token, expires_in } = await response.json()
-      const user_id = await getUserId(access_token)
+      const data = await getUserId(access_token)
 
       // TODO: Save the access token and refresh token to your database
 
@@ -52,7 +53,7 @@ export default async function handler(
       res.setHeader('Set-Cookie', [
         `access_token=${access_token}; Path=/; HttpOnly; Expires=${expiryDate}; Secure`,
         `refresh_token=${refresh_token}; Path=/; HttpOnly; Expires=${expiryDate}; Secure`,
-        `user_id=${user_id}; Path=/; HttpOnly; Expires=${new Date('9999-12-31T23:59:59Z').toUTCString()}`,
+        `user_data=${encodeURIComponent(JSON.stringify(data))}; Path=/; HttpOnly; Expires=${new Date('9999-12-31T23:59:59Z').toUTCString()}`
       ])
 
       // redirect to the dashboard
@@ -66,7 +67,7 @@ export default async function handler(
   }
 }
 
-async function getUserId(access_token: string): Promise<string> {
+async function getUserId(access_token: string): Promise<any> {
   const headers = new Headers({
     'Authorization': `Bearer ${access_token}`,
     'Client-Id': process.env.TWITCH_CLIENT_ID || '',
@@ -86,5 +87,5 @@ async function getUserId(access_token: string): Promise<string> {
     throw new Error('No user data returned')
   }
 
-  return data[0].id
+  return data[0];
 }

@@ -1,5 +1,6 @@
-import { ThemeProvider, Experimental_CssVarsProvider as CssVarsProvider } from "@mui/material";
+import { Experimental_CssVarsProvider as CssVarsProvider } from "@mui/material";
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
+// import React from "react";
 import theme from "./theme";
 import { StyledHeader } from "./styled";
 import { Background } from "./background";
@@ -16,7 +17,6 @@ function MainPageHeader(props) {
   return (
     <html>
       <body>
-        {/* <ThemeProvider theme={theme}> */}
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <CssVarsProvider theme={theme}>
             <StyledHeader />
@@ -24,7 +24,6 @@ function MainPageHeader(props) {
             {children}
           </CssVarsProvider>
         </AppRouterCacheProvider>
-        {/* </ThemeProvider> */}
       </body>
     </html>
   );

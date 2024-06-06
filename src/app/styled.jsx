@@ -33,6 +33,7 @@ const StyledTitle = styled("div")(({ theme }) => ({
     alignItems: "center",
     width: "15%",
     height: "100%",
+    cursor: "pointer",
     "& span": {
       fontSize: "1.6rem",
       fontWeight: "bold",
@@ -113,7 +114,11 @@ const StyledHeader = ({ }) => {
       })()}
     >
       <StyledHeaderContainer>
-        <StyledTitle>
+        <StyledTitle
+          onClick={() => {
+            window.location.href = "/";
+          }}
+        >
           <Avatar alt="Clipper" src="images/clipper.png" sx={{ width: "4rem", height: "4rem" }} />
           <span>Clipper</span>
         </StyledTitle>

@@ -1,7 +1,7 @@
 .header {
-  position: relative;
+  position: fixed;
   width: calc(100% - 14rem);
-  margin: 2.5rem 5rem 2.5rem 5rem;
+  margin: 1.5rem 5rem 0 5rem;
   display: flex;
   justify-content: space-between;
   color: var(--mui-palette-text-main);
@@ -11,6 +11,7 @@
   transition: box-shadow .1s, transform .1s ease-in-out;
   box-shadow: 0 .4rem 0 0 var(--mui-palette-background-dark);
   transform: translateY(-.4rem);
+  z-index: 3;
 
   &:hover {
     transform: translateY(0);
@@ -70,7 +71,7 @@
 .clipsContainer {
   width: calc(100% - 2rem);
   height: 100%;
-  margin: auto;
+  margin: 10rem auto auto auto;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;

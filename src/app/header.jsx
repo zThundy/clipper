@@ -1,11 +1,12 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
+import Image from "next/image";
 
+import { useEffect, useState } from 'react';
 import { Container, Button, Avatar, Badge } from '@mui/material';
 import styled from '@emotion/styled';
 import { Dashboard, Login } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
 
 const StyledHeaderContainer = styled(Container)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: {
@@ -166,7 +167,7 @@ function Header({ }) {
                 backgroundColor: "var(--mui-palette-background-dark)",
                 border: "3px solid var(--mui-palette-background-light)"
               }}>
-              <img src="images/clipper.png" style={{ width: "2.5rem", height: "2.5rem" }} />
+              <Image src="/images/clipper.png" width={45} height={45} alt="logo" />
             </Avatar>
           </StyledBadge>
           <span>Clipper</span>

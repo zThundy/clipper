@@ -15,7 +15,7 @@
   height: fit-content;
   width: 100vw;
   text-align: center;
-  margin: 2rem;
+  margin: auto 0 auto 0;
   background-color: var(--mui-palette-background-main);
   border-radius: 1rem;
   padding: 1rem;

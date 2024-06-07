@@ -4,7 +4,8 @@ import { usePathname } from 'next/navigation';
 
 import { Container, Button, Avatar } from '@mui/material';
 import styled from '@emotion/styled';
-import { Dashboard } from '@mui/icons-material';
+import { Dashboard, Login } from '@mui/icons-material';
+import { useEffect, useState } from 'react';
 
 const StyledHeaderContainer = styled(Container)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: {
@@ -91,12 +92,22 @@ const StyledButton = styled(Button)(({ theme }) => ({
       backgroundColor: theme.vars.palette.primary.light + " !important",
       borderRadius: ".5rem",
       cursor: "pointer",
+    },
+    "& .MuiSvgIcon-root": {
+      fontSize: "1.6rem"
     }
   }
 }));
 
 const StyledHeader = ({ }) => {
   const path = usePathname();
+  const [loggedIn, setLoggedIn] = useState("");
+
+  useEffect(() => {
+    const loggedIn = Boolean(localStorage.getItem("loggedIn"));
+    if (loggedIn) setLoggedIn("Dashboard");
+    else setLoggedIn("Login");
+  }, []);
 
   return (
     <div
@@ -133,13 +144,12 @@ const StyledHeader = ({ }) => {
           disableElevation
           disableRipple
           disableFocusRipple
-          startIcon={<Dashboard />}
+          startIcon={loggedIn === "Dashboard" ? <Dashboard /> : <Login fontSize='large' />}
           onClick={() => {
-            if (path === "/dashboard") return;
-            // open link in a new page
-            window.open("/api/login", "_blank");
+            if (loggedIn === "Dashboard") window.location.href = "/dashboard";
+            else window.open("/api/login", "_blank");
           }}
-        >Dashboard</StyledButton>
+        >{loggedIn}</StyledButton>
       </StyledHeaderContainer>
     </div>
   )

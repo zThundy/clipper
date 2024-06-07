@@ -105,6 +105,7 @@ function Dashboard({ }) {
 
   useEffect(() => {
     console.log("fetching clips... or changing page...");
+    localStorage.setItem("loggedIn", "true");
 
     // get the clips on page load using the api call /api/get-clips
     fetch(`/api/get-clips`)

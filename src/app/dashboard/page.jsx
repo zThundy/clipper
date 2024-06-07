@@ -51,9 +51,9 @@ function Loading({ }) {
               alignItems: "center",
               justifyContent: "center",
             }}
+            key={index}
           >
             <Skeleton
-              key={index}
               variant="rectangular"
               width={clipsDimenstions.width}
               height={clipsDimenstions.height}
@@ -61,7 +61,6 @@ function Loading({ }) {
               animation="wave"
             />
             <Skeleton
-              key={index}
               variant="text"
               width={clipsDimenstions.width}
               height={20}

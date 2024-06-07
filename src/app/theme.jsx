@@ -23,7 +23,7 @@ const theme = extendTheme({
       }
     }),
     warning: {
-      main: 'rgb(255, 255, 0)'
+      main: 'rgb(200, 200, 0)'
     },
     text: {
       main: "rgb(255, 255, 255)",

@@ -1,10 +1,11 @@
 import { Experimental_CssVarsProvider as CssVarsProvider } from "@mui/material";
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
-// import React from "react";
-import theme from "./theme";
-import { StyledHeader } from "./styled";
-import { Background } from "./background";
 import "./global.css";
+
+import theme from "./theme";
+import Header from "./header";
+import { Background } from "./background";
+import Cookies from "./cookies";
 
 export const metadata = {
   title: "Clipper - Clip manager",
@@ -19,9 +20,10 @@ function MainPageHeader(props) {
       <body>
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <CssVarsProvider theme={theme}>
-            <StyledHeader />
+            <Header />
             <Background />
             {children}
+            <Cookies />
           </CssVarsProvider>
         </AppRouterCacheProvider>
       </body>

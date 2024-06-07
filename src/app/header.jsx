@@ -47,7 +47,7 @@ const StyledNav = styled("nav")(({ theme }) => ({
   [theme.breakpoints.up('sm')]: {
     display: "flex",
     alignItems: "center",
-    width: "55%",
+    width: "60%",
     height: "100%",
     "& a": {
       color: theme.vars.palette.text.dark,
@@ -60,7 +60,10 @@ const StyledNav = styled("nav")(({ theme }) => ({
         color: theme.vars.palette.text.light
       }
     }
-  }
+  },
+  [theme.breakpoints.down('sm')]: {
+    display: "none"
+  },
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
@@ -113,7 +116,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   }
 }));
 
-const StyledHeader = ({ }) => {
+function Header({ }) {
   const path = usePathname();
   const [loggedIn, setLoggedIn] = useState("");
 
@@ -170,7 +173,7 @@ const StyledHeader = ({ }) => {
         <StyledNav>
           {path === "/" ? <a href="#features">Features</a> : null}
           {path === "/" ? <a href="#about">About</a> : null}
-          {path === "/" ? <a href="#contact">Premium ✦</a> : null}
+          {/* {path === "/" ? <a href="#contact">Premium ✦</a> : null} */}
         </StyledNav>
         <StyledButton
           variant="contained"
@@ -194,4 +197,4 @@ const StyledHeader = ({ }) => {
   )
 };
 
-export { StyledHeader };
+export default Header;

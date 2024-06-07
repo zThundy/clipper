@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Button, Checkbox, FormControlLabel, Switch, Snackbar, Alert, Modal, Pagination } from "@mui/material";
+import { Button, Checkbox, FormControlLabel, Switch, Snackbar, Alert, Modal, Pagination, Skeleton } from "@mui/material";
 import Image from "next/image";
 import { Delete, Download, Home, Info } from "@mui/icons-material";
 
@@ -29,6 +29,51 @@ const clipsDimenstions = {
 };
 
 const clipsPerPage = 21;
+
+function Loading({ }) {
+  const [clipsNumber, setClipsNumber] = useState([]);
+
+  useEffect(() => {
+    let _clipsNumber = [];
+    for (let i = 0; i < clipsPerPage - 9; i++) _clipsNumber.push(i);
+    setClipsNumber(_clipsNumber);
+  }, []);
+
+
+  return (
+    <>
+      {
+        clipsNumber.map((_, index) => (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Skeleton
+              key={index}
+              variant="rectangular"
+              width={clipsDimenstions.width}
+              height={clipsDimenstions.height}
+              style={{ margin: "0 4rem 1rem 4rem" }}
+              animation="wave"
+            />
+            <Skeleton
+              key={index}
+              variant="text"
+              width={clipsDimenstions.width}
+              height={20}
+              style={{ margin: "0 0 4rem 0" }}
+              animation="wave"
+            />
+          </div>
+        ))
+      }
+    </>
+  )
+}
 
 function Clip({ clip, openModal, _ }) {
   const [_clip, setClip] = useState(clip);
@@ -148,7 +193,7 @@ function Dashboard({ }) {
         open={open}
         autoHideDuration={5000}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
           onClose={handleClose}
@@ -253,6 +298,8 @@ function Dashboard({ }) {
       <div className={style.clipsContainer}>
         {
           useMemo(() => {
+            if (clips.length === 0) return <Loading />;
+
             return clips
               .slice((currentPage - 1) * clipsPerPage, currentPage * clipsPerPage)
               .map((clip, index) => (

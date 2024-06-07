@@ -146,7 +146,12 @@ const StyledHeader = ({ }) => {
           disableFocusRipple
           startIcon={loggedIn === "Dashboard" ? <Dashboard /> : <Login fontSize='large' />}
           onClick={() => {
-            if (loggedIn === "Dashboard") window.location.href = "/dashboard";
+            if (loggedIn === "Dashboard") {
+              // double check on click just in case
+              const loggedIn = Boolean(localStorage.getItem("loggedIn"));
+              if (!loggedIn) return window.open("/api/login", "_blank");
+              window.location.href = "/dashboard";
+            }
             else window.open("/api/login", "_blank");
           }}
         >{loggedIn}</StyledButton>

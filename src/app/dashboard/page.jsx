@@ -79,7 +79,6 @@ function Clip({ clip, openModal, _ }) {
   const [checked, setChecked] = useState(clip.checked || false);
 
   // const checked = useMemo(() => { return _clip.checked || false; }, [_clip.checked]);
-
   // const [checked, setChecked] = useState(clip.checked || false);
 
   useEffect(() => {

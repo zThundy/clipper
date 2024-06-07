@@ -53,7 +53,12 @@ function Cookies({ }) {
   }
 
   return (
-    <div>
+    <div
+      style={{
+        zIndex: 1000,
+        position: 'fixed',
+      }}
+    >
       <TrapFocus open disableAutoFocus disableEnforceFocus>
         <Fade appear={true} in={bannerOpen === "open"} timeout={1000} >
           <Paper

@@ -144,6 +144,7 @@ function Header({ }) {
       <StyledHeaderContainer>
         <StyledTitle
           onClick={() => {
+            if (path === "/") return window.scrollTo(0, 0);
             window.location.href = "/";
           }}
         >
@@ -171,8 +172,8 @@ function Header({ }) {
           <span>Clipper</span>
         </StyledTitle>
         <StyledNav>
-          {path === "/" ? <a href="#features">Features</a> : null}
-          {path === "/" ? <a href="#about">About</a> : null}
+          <a href="#features">Features</a>
+          <a href="#about">About</a>
           {/* {path === "/" ? <a href="#contact">Premium ✦</a> : null} */}
         </StyledNav>
         <StyledButton

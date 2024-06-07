@@ -1,7 +1,8 @@
 "use client";
 
 import { Checklist, Download, Login } from "@mui/icons-material";
-import { Container, Stack, styled, Paper } from "@mui/material";
+import { Container, Stack, Paper } from "@mui/material";
+import styled from '@emotion/styled';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.vars.palette.background.main,

@@ -25,7 +25,7 @@ export default function NotFound() {
       <div style={{
         color: "var(--mui-palette-text-primary)",
       }}>
-        We couldn't find the page you were looking for.
+        We couldn&apos;t find the page you were looking for.
       </div>
     </Container>
   );

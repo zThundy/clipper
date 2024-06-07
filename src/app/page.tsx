@@ -54,7 +54,7 @@ export default function Home({ }) {
             With Clipper, users can organize, edit, and share their Twitch clips in just a few clicks.<br />
             The platform offers powerful tools for categorizing clips, trimming and combining footage, and adding custom thumbnails and annotations.<br />
             Additionally, Clipper provides advanced search features and analytics to track the performance of clips, making it easier for streamers to highlight their best moments and engage their audience.<br />
-            Whether you're a seasoned streamer or just starting, Clipper streamlines the clip management process, allowing you to focus on creating great content.
+            Whether you&apos;re a seasoned streamer or just starting, Clipper streamlines the clip management process, allowing you to focus on creating great content.
           </div>
         </Container>
 

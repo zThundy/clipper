@@ -22,6 +22,9 @@ const theme = extendTheme({
         main: "rgb(38, 38, 38)",
       }
     }),
+    warning: {
+      main: 'rgb(255, 255, 0)'
+    },
     text: {
       main: "rgb(255, 255, 255)",
       primary: 'rgb(255, 255, 255)',

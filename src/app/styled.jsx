@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 
-import { Container, Button, Avatar } from '@mui/material';
+import { Container, Button, Avatar, Badge } from '@mui/material';
 import styled from '@emotion/styled';
 import { Dashboard, Login } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
@@ -99,6 +99,20 @@ const StyledButton = styled(Button)(({ theme }) => ({
   }
 }));
 
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  [theme.breakpoints.up('sm')]: {
+    "& .MuiBadge-dot": {
+      backgroundColor: theme.vars.palette.warning.light,
+      boxShadow: "0 0 0 2px " + theme.vars.palette.background.light,
+      fontSize: ".8rem",
+    },
+    "& .MuiBadge-badge": {
+      fontSize: ".8rem",
+      fontWeight: "bold",
+    }
+  }
+}));
+
 const StyledHeader = ({ }) => {
   const path = usePathname();
   const [loggedIn, setLoggedIn] = useState("");
@@ -130,7 +144,27 @@ const StyledHeader = ({ }) => {
             window.location.href = "/";
           }}
         >
-          <Avatar alt="Clipper" src="images/clipper.png" sx={{ width: "4rem", height: "4rem" }} />
+          <StyledBadge
+            badgeContent={"Beta"}
+            color="warning"
+            fontSize=".8rem"
+            overlap='circular'
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <Avatar
+              alt="Clipper"
+              sx={{
+                width: "4rem",
+                height: "4rem",
+                backgroundColor: "var(--mui-palette-background-dark)",
+                border: "3px solid var(--mui-palette-background-light)"
+              }}>
+              <img src="images/clipper.png" style={{ width: "2.5rem", height: "2.5rem" }} />
+            </Avatar>
+          </StyledBadge>
           <span>Clipper</span>
         </StyledTitle>
         <StyledNav>

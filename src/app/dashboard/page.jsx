@@ -4,11 +4,11 @@ import { useMemo, useState, useEffect } from "react";
 import { Button, Checkbox, FormControlLabel, Switch, Snackbar, Alert, Modal, Pagination, Skeleton } from "@mui/material";
 import { Delete, Download, Home } from "@mui/icons-material";
 
-import ModalContent from "./modal.content";
+import ModalClipContent from "./modal.content";
+import ModalDownloadContent from "./modal.download";
 import Clip from "./clip";
 
 import style from "./page.module.css";
-import modal from "./page.modal.module.css";
 
 // const StyledPageButton = styled(Button)(({ theme }) => ({
 //   color: theme.vars.palette.text.main,
@@ -84,6 +84,9 @@ function Dashboard({ }) {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteEnabled, setDeleteEnabled] = useState(false);
+  const [selectedClips, setSelectedClips] = useState([]);
+
+  const [clipsDownload, setClipsDownload] = useState(false);
 
   useEffect(() => {
     console.log("fetching clips... or changing page...");
@@ -142,13 +145,8 @@ function Dashboard({ }) {
         </Alert>
       </Snackbar>
 
-      <Modal
-        open={modalData !== null}
-        onClose={() => setModalData(null)}
-        className={modal.modalContainer}
-      >
-        <ModalContent clip={modalData} />
-      </Modal>
+      <ModalClipContent clip={modalData} setModalData={setModalData} />
+      <ModalDownloadContent open={clipsDownload} selectedClips={selectedClips} clips={clips} setClipsDownload={setClipsDownload} />
 
       <div className={style.header}>
         <div style={{
@@ -179,6 +177,7 @@ function Dashboard({ }) {
                 clips.forEach(_ => _.checked = !selectAll);
                 setClips(clips);
                 setSelectAll(!selectAll);
+                setSelectedClips(clips.filter(_ => _.checked));
               }}
               label="Select all"
             />
@@ -196,20 +195,7 @@ function Dashboard({ }) {
             className={style.downloadButton}
             startIcon={<Download />}
             onClick={() => {
-              let selectedClips = clips.filter(_ => _.checked);
-              if (selectedClips.length === 0) {
-                setNotifType("error");
-                handleOpen("No clips selected for download.");
-                return;
-              }
-
-              let urls = selectedClips.map(_ => _.url);
-              setNotifType("success");
-              handleOpen(`Downloading ${urls.length} clips...`);
-              // deselect all clips
-              clips.forEach(_ => _.checked = false);
-              console.log(urls);
-              setSelectAll(false);
+              setClipsDownload(true);
             }}
           >
             Download
@@ -249,7 +235,8 @@ function Dashboard({ }) {
                   }}
                   _={() => {
                     // log all checked clips
-                    console.log(clips.filter(_ => _.checked));
+                    // console.log(clips.filter(_ => _.checked));
+                    setSelectedClips(clips.filter(_ => _.checked));
                   }}
                 />
               ));

@@ -1,0 +1,13 @@
+.modal {
+    z-index: 4;
+    width: 70rem;
+    height: 20rem;
+    background-color: var(--mui-palette-background-light);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    color: var(--mui-palette-text-primary);
+}

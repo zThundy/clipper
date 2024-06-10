@@ -146,7 +146,7 @@ function Dashboard({ }) {
       </Snackbar>
 
       <ModalClipContent clip={modalData} setModalData={setModalData} />
-      <ModalDownloadContent open={clipsDownload} selectedClips={selectedClips} clips={clips} setClipsDownload={setClipsDownload} />
+      <ModalDownloadContent open={clipsDownload} selectedClips={selectedClips} setClipsDownload={setClipsDownload} />
 
       <div className={style.header}>
         <div style={{

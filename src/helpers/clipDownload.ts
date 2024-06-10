@@ -1,22 +1,15 @@
-import { EventEmitter } from 'events';
 import { ensureDirectoryExists, existsSync, writeFile } from './filesystem';
-import { TransferSpeedCalculator } from './transfer-speed-calculator';
 import { getClipUrl } from './clipUrlFetcher';
 import { Downloader } from './downloader';
 import { ClipDataResponse } from './types';
 import { appPath } from './utils';
 
 
-export class ClipDownloader extends EventEmitter {
+export class ClipDownloader {
     private clipOrUrl: ClipDataResponse;
 
-    public readonly speed: TransferSpeedCalculator;
-
     constructor(clipOrUrl: ClipDataResponse) {
-        super();
         this.clipOrUrl = clipOrUrl;
-
-        this.speed = new TransferSpeedCalculator;
     }
 
     async download(): Promise<void> {
@@ -39,10 +32,6 @@ export class ClipDownloader extends EventEmitter {
 
         if (url) {
             const downloader = new Downloader(url, mp4Path);
-
-            downloader.on('progress', bytes => {
-                this.speed.data(bytes);
-            });
 
             console.log(`[clipDownload] Downloading clip ${clip.title}`);
             promises.push(downloader.download());

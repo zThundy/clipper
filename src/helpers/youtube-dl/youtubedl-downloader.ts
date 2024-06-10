@@ -12,20 +12,20 @@ export class YoutubedlDownloader {
         const output = this.path();
         const url = this.url();
 
-        console.log(`Downloading youtube-dl from ${url} to ${output}`); // eslint-disable-line no-console
+        console.log(`[youtubedl-downloader.ts] Downloading youtube-dl from ${url} to ${output}`); // eslint-disable-line no-console
         ensureDirectoryExists(binPath());
         if (await exists(output)) {
-            console.log(`youtube-dl: ${output} already exists`);
+            console.log(`[youtubedl-downloader.ts] youtube-dl: ${output} already exists`);
             return;
         }
 
-        console.log("Downloader class initialized")
+        console.log("[youtubedl-downloader.ts] Downloader class initialized")
         const downloader = new Downloader(url, output);
 
-        console.log(`youtubedl: Download latest version ${url} to ${output}`);
+        console.log(`[youtubedl-downloader.ts] Download latest version ${url} to ${output}`);
         await downloader.download();
 
-        console.log(`youtube-dl: Downloaded to ${output}`); // eslint-disable-line no-console
+        console.log(`[youtubedl-downloader.ts] Downloaded to ${output}`); // eslint-disable-line no-console
 
         // TODO: move this to downloader
         fs.chmodSync(output, permission);

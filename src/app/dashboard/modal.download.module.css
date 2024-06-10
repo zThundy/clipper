@@ -1,7 +1,7 @@
 .modal {
     z-index: 4;
     width: 70rem;
-    height: 20rem;
+    height: 40rem;
     background-color: var(--mui-palette-background-light);
     border-radius: 10px;
     display: flex;
@@ -10,4 +10,53 @@
     align-items: center;
     margin: auto;
     color: var(--mui-palette-text-primary);
+}
+
+.modalContent {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    width: 100%;
+    color: var(--mui-palette-text-primary);
+}
+
+.list {
+    max-height: 35rem;
+    overflow: auto;
+    width: 90%;
+    color: var(--mui-palette-text-primary);
+    /* background-color: red; */
+}
+
+.listItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--mui-palette-background-light);
+    margin: 0.5rem;
+    border-radius: 5px;
+    min-height: 3rem;
+    /* border-bottom: 1px solid var(--mui-palette-text-primary); */
+    color: var(--mui-palette-text-primary);
+
+    & .text {
+        width: 50%;
+        color: var(--mui-palette-text-primary);
+        padding: 0 1rem;
+    }
+
+    & .status {
+        width: 10%;
+        color: var(--mui-palette-text-primary);
+        padding: 0 1rem;
+    }
+
+    & .progress {
+        width: 100%;
+        color: var(--mui-palette-text-primary);
+    }
 }

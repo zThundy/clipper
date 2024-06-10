@@ -1,7 +1,5 @@
 import fs from 'fs';
 import axios from 'axios';
-import { EventEmitter } from 'events';
-import { TransferSpeedCalculator } from './transfer-speed-calculator';
 import { appPath } from './utils';
 import { retry } from './retry';
 
@@ -11,28 +9,19 @@ export function dryRuns(enabled = true) {
     dryRunning = enabled;
 }
 
-export class Downloader extends EventEmitter {
+export class Downloader {
     private readonly url: string;
     private readonly path: string;
 
     private tries: number;
     private maxTries: number;
 
-    private speed: TransferSpeedCalculator;
-
     constructor(url: string, path: string) {
-        super();
-
         this.url = url;
         this.path = appPath(path);
 
         this.tries = 0;
         this.maxTries = 0;
-
-        this.speed = new TransferSpeedCalculator;
-
-        // Bubble 'progress' event up
-        this.speed.on('progress', this.emit.bind(this, 'progress'));
     }
 
     async download(): Promise<boolean> {
@@ -42,7 +31,7 @@ export class Downloader extends EventEmitter {
 
                 return true;
             } catch (e) {
-                console.error(`[${this.tries}/${this.maxTries}] Error while starting download`);
+                console.error(`[downloader.ts] [${this.tries}/${this.maxTries}] Error while starting download`);
                 console.error(e);
             }
         } while (++this.tries < this.maxTries);
@@ -61,11 +50,11 @@ export class Downloader extends EventEmitter {
 
             // TODO: type this
             data.on('data', (chunk: any) => {
-                this.speed.data(chunk.length);
+                // console.log(`[downloader.ts] Downloaded ${chunk.length} bytes`)
             });
 
             data.on('close', async () => {
-                console.log(`Download ${this.url} finished on ${this.path}`);
+                console.log(`[downloader.ts] Download ${this.url} finished on ${this.path}`);
                 await retry(async () => fs.renameSync(`${this.path}.progress`, `${this.path}`), {
                     delay: 200,
                     factor: 2,

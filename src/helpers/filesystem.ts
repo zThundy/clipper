@@ -19,10 +19,10 @@ export function existsSync(filePath: string): boolean {
 
 export function ensureDirectoryExists(directory: string): void {
     if (!existsSync(directory)) {
-        console.log(`Could not find "${directory}", creating it...`);
+        console.log(`[fileSystem] Could not find "${directory}", creating it...`);
         fs.mkdirSync(directory, { recursive: true });
     } else {
-        console.log(`"${directory}" directory found!`);
+        console.log(`[fileSystem] "${directory}" directory found!`);
     }
 }
 
@@ -35,7 +35,7 @@ export async function exists(filePath: string): Promise<boolean> {
         try {
             // throws if it doesn't exist
             fs.access(filePath, fs.constants.F_OK, (err) => {
-                if (err) return reject(false);
+                if (err) return resolve(false);
                 resolve(true);
             });
         } catch (error) {

@@ -3,24 +3,55 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { ClipDataResponse } from '../../helpers/types'
 import { ClipDownloader } from '../../helpers/clipDownload'
 
+import fs from 'fs'
+import { appPath } from '../../helpers/utils'
+
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
     if (req.method === 'POST') {
-        const clips = req.body as ClipDataResponse[];
+        const selectedClips: ClipDataResponse[] = req.body;
 
-        for (const clip of clips) {
-            // console.log(`Downloading clip ${clip.title}`);
-            const downloader = new ClipDownloader(clip);
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader("Content-Encoding", "none");
 
-            downloader.on('progress', bytes => {
-                console.log(`Downloaded ${bytes} bytes`);
-            });
+        res.write('data: {"status": "downloading", "type": "initial"}\n\n');
 
-            await downloader.download();
+        for (const clip of selectedClips) {
+            try {
+                const downloader = new ClipDownloader(clip);
+
+                res.write(`data: {"id": "${clip.id}", "status": "downloading", "type": "progress"}\n\n`);
+                await downloader.download();
+                const resp = {
+                    id: clip.id,
+                    status: 'success',
+                    type: "final"
+                }
+                res.write(`data: ${JSON.stringify(resp)}\n\n`);
+            } catch (e: any) {
+                const resp = {
+                    id: clip.id,
+                    status: 'failed',
+                    error: e.message,
+                    type: "final"
+                }
+                res.write(`data: ${JSON.stringify(resp)}\n\n`);
+            }
         }
 
-        res.status(200).json({ success: true });
+        // DEV: delete all the downloaded clips
+        selectedClips.forEach(clip => {
+            const mp4Path = `clips/${clip.id}.mp4`;
+            const metaPath = `clips/${clip.id}.json`;
+            fs.unlinkSync(appPath(mp4Path));
+            fs.unlinkSync(appPath(metaPath));
+        })
+
+        res.write('data: {"status": "done", "type": "final"}\n\n');
+        res.end();
     }
 }

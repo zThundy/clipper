@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 // import { redirect } from 'next/navigation';
 import * as fns from 'date-fns';
-import { IncomingMessage } from 'http'
 
 import {
     ClipDataResponse,
@@ -68,7 +67,7 @@ export default async function handler(
     }
 }
 
-function parseCookies(req: IncomingMessage) {
+function parseCookies(req: NextApiRequest) {
     const rawCookies = req.headers.cookie?.split('; ') || []
     const parsedCookies: { [key: string]: string } = {}
     rawCookies.forEach(rawCookie => {

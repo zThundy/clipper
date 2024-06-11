@@ -15,15 +15,11 @@ export default function handler(
     const responseType = 'code'
     const scope = 'user:read:email clips:edit'
 
-    console.log('redirectUri', redirectUri)
-
     const url = new URL('https://id.twitch.tv/oauth2/authorize')
     url.searchParams.append('client_id', clientId)
     url.searchParams.append('redirect_uri', redirectUri)
     url.searchParams.append('response_type', responseType)
     url.searchParams.append('scope', scope)
-
-    console.log("sending url", url.toString())
 
     res.redirect(url.toString())
   } else {

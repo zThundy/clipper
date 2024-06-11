@@ -16,7 +16,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
     margin: auto;
     width: 100%;
@@ -24,7 +24,7 @@
 }
 
 .list {
-    max-height: 35rem;
+    max-height: 30rem;
     overflow: auto;
     width: 90%;
     color: var(--mui-palette-text-primary);
@@ -59,4 +59,15 @@
         width: 100%;
         color: var(--mui-palette-text-primary);
     }
+}
+
+.downloadButton {
+    width: 80%;
+    height: 3rem;
+    background-color: var(--mui-palette-success-main);
+    color: var(--mui-palette-text-primary);
+    border: none;
+    border-radius: 5px;
+    margin: 1rem 0;
+    cursor: pointer;
 }

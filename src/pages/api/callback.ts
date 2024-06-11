@@ -44,7 +44,7 @@ export default async function handler(
       }
 
       const { access_token, refresh_token, expires_in } = await response.json()
-      const data = await getUserId(access_token)
+      const data = await getUserTwitchData(access_token)
 
       // TODO: Save the access token and refresh token to your database
 
@@ -67,25 +67,15 @@ export default async function handler(
   }
 }
 
-async function getUserId(access_token: string): Promise<any> {
+async function getUserTwitchData(access_token: string): Promise<any> {
   const headers = new Headers({
     'Authorization': `Bearer ${access_token}`,
     'Client-Id': process.env.TWITCH_CLIENT_ID || '',
   });
 
-  const response = await fetch('https://api.twitch.tv/helix/users', {
-    headers,
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to get user ID')
-  }
-
-  const { data } = await response.json()
-
-  if (!data || data.length === 0) {
-    throw new Error('No user data returned')
-  }
-
+  const response = await fetch('https://api.twitch.tv/helix/users', { headers });
+  if (!response.ok)  throw new Error('Failed to get user ID');
+  const { data } = await response.json();
+  if (!data || data.length === 0)  throw new Error('No user data returned');
   return data[0];
 }

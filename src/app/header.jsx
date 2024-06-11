@@ -4,14 +4,15 @@ import { usePathname } from 'next/navigation';
 import Image from "next/image";
 
 import { useEffect, useState } from 'react';
-import { Container, Button, Avatar, Badge } from '@mui/material';
+import { Container, Grid, Button, Avatar, Badge } from '@mui/material';
 import styled from '@emotion/styled';
 import { Dashboard, Login } from '@mui/icons-material';
 
-const StyledHeaderContainer = styled(Container)(({ theme }) => ({
+const StyledHeaderContainer = styled(Grid)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: {
     position: "fixed",
     margin: "auto",
+    width: "80%",
     backgroundColor: theme.vars.palette.background.main,
     borderRadius: "50rem",
     color: theme.vars.palette.text.primary,
@@ -142,58 +143,64 @@ function Header({ }) {
         };
       })()}
     >
-      <StyledHeaderContainer>
-        <StyledTitle
-          onClick={() => {
-            if (path === "/") return window.scrollTo(0, 0);
-            window.location.href = "/";
-          }}
-        >
-          <StyledBadge
-            badgeContent={"Beta"}
-            color="warning"
-            fontSize=".8rem"
-            overlap='circular'
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "right",
+      <StyledHeaderContainer container style={{ justifyContent: "space-between" }}>
+        <Grid item xs={3} sm={3} md={3} lg={3} xl={3} style={{ display: "flex", justifyContent: "left" }}>
+          <StyledTitle
+            onClick={() => {
+              if (path === "/") return window.scrollTo(0, 0);
+              window.location.href = "/";
             }}
           >
-            <Avatar
-              alt="Clipper"
-              sx={{
-                width: "4rem",
-                height: "4rem",
-                backgroundColor: "var(--mui-palette-background-dark)",
-                border: "3px solid var(--mui-palette-background-light)"
-              }}>
-              <Image src="/images/clipper.png" width={45} height={45} alt="logo" />
-            </Avatar>
-          </StyledBadge>
-          <span>Clipper</span>
-        </StyledTitle>
-        <StyledNav>
-          <a href="#features">Features</a>
-          <a href="#about">About</a>
-          {/* {path === "/" ? <a href="#contact">Premium ✦</a> : null} */}
-        </StyledNav>
-        <StyledButton
-          variant="contained"
-          color='primary'
-          disableElevation
-          disableRipple
-          disableFocusRipple
-          startIcon={loggedIn === "Dashboard" ? <Dashboard /> : <Login fontSize='large' />}
-          onClick={() => {
-            if (loggedIn === "Dashboard") {
-              // double check on click just in case
-              const loggedIn = Boolean(localStorage.getItem("loggedIn"));
-              if (!loggedIn) return window.open("/api/login", "_blank");
-              window.location.href = "/dashboard";
-            }
-            else window.open("/api/login", "_blank");
-          }}
-        >{loggedIn}</StyledButton>
+            <StyledBadge
+              badgeContent={"Beta"}
+              color="warning"
+              fontSize=".8rem"
+              overlap='circular'
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+            >
+              <Avatar
+                alt="Clipmaner"
+                sx={{
+                  width: "4rem",
+                  height: "4rem",
+                  backgroundColor: "var(--mui-palette-background-dark)",
+                  border: "3px solid var(--mui-palette-background-light)"
+                }}>
+                <Image src="/images/clipmaner.png" width={45} height={45} alt="logo" />
+              </Avatar>
+            </StyledBadge>
+            <span>Clipmaner</span>
+          </StyledTitle>
+        </Grid>
+        <Grid item xs={5} sm={5} md={5} lg={5} xl={5} style={{ display: "flex", justifyContent: "left" }}>
+          <StyledNav>
+            <a href="#features">Features</a>
+            <a href="#about">About</a>
+            {/* {path === "/" ? <a href="#contact">Premium ✦</a> : null} */}
+          </StyledNav>
+        </Grid>
+        <Grid item xs={4} sm={4} md={4} lg={4} xl={4} style={{ display: "flex", justifyContent: "right" }}>
+          <StyledButton
+            variant="contained"
+            color='primary'
+            disableElevation
+            disableRipple
+            disableFocusRipple
+            startIcon={loggedIn === "Dashboard" ? <Dashboard /> : <Login fontSize='large' />}
+            onClick={() => {
+              if (loggedIn === "Dashboard") {
+                // double check on click just in case
+                const loggedIn = Boolean(localStorage.getItem("loggedIn"));
+                if (!loggedIn) return window.open("/api/login", "_blank");
+                window.location.href = "/dashboard";
+              }
+              else window.open("/api/login", "_blank");
+            }}
+          >{loggedIn}</StyledButton>
+        </Grid>
       </StyledHeaderContainer>
     </div>
   )

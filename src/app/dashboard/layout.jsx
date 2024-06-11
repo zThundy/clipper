@@ -2,7 +2,7 @@
 import style from "./layout.module.css";
 
 export const metadata = {
-  title: "Clipper - Dashboard",
+  title: "Clipmaner - Dashboard",
   description: "The best way to manage your twitch clips",
 };
 

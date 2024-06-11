@@ -14,6 +14,7 @@ export default async function handler(
     // console.log('req.headers.host', req.headers.host)
     // console.log('req.query.code', req.query.code)
 
+    const protocol = req.headers['x-forwarded-proto'] || 'http'
     const code = req.query.code as string
 
     if (!code) {
@@ -28,7 +29,7 @@ export default async function handler(
         client_secret: process.env.TWITCH_CLIENT_SECRET || '',
         code,
         grant_type: 'authorization_code',
-        redirect_uri: `http://${req.headers.host}/api/callback`
+        redirect_uri: `${protocol}://${req.headers.host}/api/callback`
       });
 
       const response = await fetch('https://id.twitch.tv/oauth2/token', {

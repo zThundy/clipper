@@ -1,7 +1,8 @@
 import { Divider, Grid, Modal, Button } from "@mui/material";
 
+import Image from "next/image";
 import modal from "./page.modal.module.css";
-import { BookSharp, CalendarToday, Person, PunchClock, Timeline, VideoCameraFront, ViewStream } from "@mui/icons-material";
+import { BookSharp, CalendarToday, Person, Timeline, VideoCameraFront, ViewStream } from "@mui/icons-material";
 
 export default function ModalContent({ clip, setModalData }) {
   const formatDate = (date) => {
@@ -41,7 +42,7 @@ export default function ModalContent({ clip, setModalData }) {
               justifyContent: "center",
             }}
           >
-            <img width="90%" src={clip?.thumbnail_url.replace("%{width}", 320).replace("%{height}", 180)} alt={clip?.title} />
+            <Image width="90%" src={clip?.thumbnail_url.replace("%{width}", 320).replace("%{height}", 180)} alt={clip?.title} />
           </Grid>
           <Grid item xs={4} className={modal.elementContainer}>
             <p><Person /> Created By</p>

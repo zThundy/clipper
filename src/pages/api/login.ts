@@ -10,8 +10,10 @@ export default function handler(
   res: NextApiResponse<ResponseData>
 ) {
   if (req.method === 'GET') {
+    // calculate if it is http or https
+    const protocol = req.headers['x-forwarded-proto'] || 'http'
     const clientId = <string>process.env.TWITCH_CLIENT_ID
-    const redirectUri = `http://${req.headers.host}/api/callback`
+    const redirectUri = `${protocol}://${req.headers.host}/api/callback`
     const responseType = 'code'
     const scope = 'user:read:email clips:edit'
 

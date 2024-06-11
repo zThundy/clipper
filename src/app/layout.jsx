@@ -8,7 +8,7 @@ import { Background } from "./background";
 import Cookies from "./cookies";
 
 export const metadata = {
-  title: "Clipper - Clip manager",
+  title: "Clipmaner - Clip manager",
   description: "The best way to manage your twitch clips",
 };
 

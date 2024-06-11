@@ -79,6 +79,8 @@ export default async function handler(
             type: "clips"
           }
           res.write(`data: ${JSON.stringify(resp)}\n\n`);
+          res.end();
+          return;
         }
       }
 

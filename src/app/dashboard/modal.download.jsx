@@ -171,10 +171,15 @@ function DownloadItem({ _p, clip }) {
   useEffect(() => {
     console.log("DownloadItem progress", _p, progress);
     setProgress(_p);
+
+    // focus on the item
+    if (_p === "Downloading") {
+      document.getElementById(clip.id).scrollIntoView({ behavior: "smooth" });
+    }
   }, [_p, progress]);
 
   return (
-    <div key={clip.id} className={classes.listItem}>
+    <div id={clip.id} className={classes.listItem}>
       <span className={classes.text}>{clip.title}</span>
       <span className={classes.status}>{progress}</span>
       {progress === "Downloading" ? <LinearProgress className={classes.progress} /> : null}

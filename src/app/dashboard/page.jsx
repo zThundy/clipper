@@ -200,6 +200,12 @@ function Dashboard({ }) {
             className={style.downloadButton}
             startIcon={<Download />}
             onClick={() => {
+              // check if there are any clips selected
+              if (selectedClips.length === 0) {
+                setNotifType("warning");
+                handleOpen("No clips selected");
+                return;
+              }
               setClipsDownload(true);
             }}
           >
@@ -217,6 +223,10 @@ function Dashboard({ }) {
             className={style.deleteButton}
             startIcon={<Delete />}
             disabled={!deleteEnabled}
+            onClick={() => {
+              setNotifType("warning");
+              handleOpen("Not implemented yet :(");
+            }}
           >
             Delete
           </Button>

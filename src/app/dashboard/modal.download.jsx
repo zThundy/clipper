@@ -80,6 +80,7 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
   const [processed, setProcessed] = useState(0);
 
   useEffect(() => {
+    console.log("ModalDownload opened:", opened, open)
     setOpened(open);
     resetStates();
   }, [opened, open]);
@@ -154,7 +155,6 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     }).then(response => {
-      setClipsDownload(false);
       return response.blob();
     })
     .then(blob => {
@@ -164,16 +164,21 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
       a.download = 'clips.zip';
       a.click();
       window.URL.revokeObjectURL(url);
+      setClipsDownload(false);
     })
     .catch(error => {
       console.error('Error:', error);
+      setClipsDownload(false);
     });
   }
 
   return (
     <Modal
       open={downloading ? true : opened}
-      onClose={() => setClipsDownload(false)}
+      onClose={() => {
+        if (downloading) return;
+        setClipsDownload(false)
+      }}
       className={classes.modal}
     >
       <>

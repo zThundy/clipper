@@ -8,6 +8,15 @@ import archiver from 'archiver'
 import { appPath, sleep } from '@/helpers/utils'
 import { ensureDirectoryExists } from '@/helpers/filesystem'
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '1gb',
+    },
+    responseLimit: '5gb',
+  },
+}
+
 async function getUserTwitchData(access_token: string): Promise<any> {
   const headers = new Headers({
     'Authorization': `Bearer ${access_token}`,
@@ -96,7 +105,7 @@ export default async function handler(
         const clipMetaPath = appPath(`clips/${clip.id}.json`);
         archive.append(fs.createReadStream(clipPath), { name: `${clip.id}.mp4` });
         archive.append(fs.createReadStream(clipMetaPath), { name: `${clip.id}.json` });
-        await sleep(1000);
+        await sleep(100);
         res.write(`data: {"id": "${clip.id}", "status": "success", "type": "compressing"}\n\n`);
       }
 
@@ -108,6 +117,15 @@ export default async function handler(
         res.write('data: {"status": "done", "type": "final"}\n\n');
         res.end();
         console.log('Archive wrote %d bytes', archive.pointer());
+
+        // delete all clips
+        for (const clip of selectedClips) {
+          const clipPath = appPath(`clips/${clip.id}.mp4`);
+          const clipMetaPath = appPath(`clips/${clip.id}.json`);
+
+          fs.unlinkSync(clipPath);
+          fs.unlinkSync(clipMetaPath);
+        }
       });
     } else if (req.method === 'GET') {
       // get the zip inside zip folder
@@ -144,8 +162,10 @@ export default async function handler(
       // Stream the file
       const fileStream = fs.createReadStream(zipFilePath);
       fileStream.pipe(res);
-      // remove the zip file after sending it
-      // fs.unlinkSync(zipFilePath);
+      // delete the zip file after sending it
+      fileStream.on('end', () => {
+        fs.unlinkSync(zipFilePath);
+      });
     } else {
       res.status(405).json({ message: 'Method not allowed' })
     }

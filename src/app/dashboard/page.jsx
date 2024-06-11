@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { Button, Checkbox, FormControlLabel, Switch, Snackbar, Alert, Modal, Pagination, Skeleton } from "@mui/material";
+import { Button, Checkbox, FormControlLabel, Switch, Snackbar, Alert, Grid, Pagination, Skeleton } from "@mui/material";
 import { Delete, Download, Home } from "@mui/icons-material";
 
 import ModalClipContent from "./modal.content";
@@ -223,7 +223,7 @@ function Dashboard({ }) {
         </div>
       </div>
 
-      <div className={style.clipsContainer}>
+      <Grid container className={style.clipsContainer}>
         {
           useMemo(() => {
             if (clips.length === 0) return <Loading />;
@@ -247,7 +247,7 @@ function Dashboard({ }) {
               ));
           }, [selectAll, clips, currentPage])
         }
-      </div>
+      </Grid>
 
       <div className={style.pageSelector}>
         <Pagination

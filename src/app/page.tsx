@@ -87,6 +87,34 @@ export default function Home({ }) {
             This website is still in beta, so expect bugs.
           </div>
         </Container>
+        <Container
+          sx={{
+            display: "flex",
+            justifyContent: "left",
+            alignItems: "center",
+            textAlign: "left",
+            flexDirection: "row",
+            width: "100%",
+            height: "fit-content",
+            backgroundColor: "var(--mui-palette-warning-main)",
+            border: ".3rem solid var(--mui-palette-warning-light)",
+            padding: ".4rem",
+            borderRadius: "1rem",
+          }}
+        >
+          <Warning
+            style={{
+              fontSize: "2rem",
+              color: "var(--mui-palette-warning-contrastText)",
+            }}
+          />
+          <div style={{
+            color: "var(--mui-palette-warning-contrastText)",
+            marginLeft: ".6rem",
+          }}>
+            This website is optimized for desktop 1920x1080 resolution.
+          </div>
+        </Container>
       </section>
     </>
   );

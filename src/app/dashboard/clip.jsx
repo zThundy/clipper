@@ -4,12 +4,12 @@ import Image from "next/image";
 import style from "./page.module.css";
 import modal from "./page.modal.module.css";
 
-import { Checkbox } from "@mui/material";
+import { Checkbox, Grid } from "@mui/material";
 import { Info } from "@mui/icons-material";
 
 const clipsDimenstions = {
-  width: 380,
-  height: 220
+  width: 400,
+  height: 240
 };
 
 function Clip({ clip, openModal, _ }) {
@@ -29,7 +29,7 @@ function Clip({ clip, openModal, _ }) {
   }
 
   return (
-    <div className={style.clipContainer} data-checked={checked} data-link={clip.url} data-title={clip.title}>
+    <Grid xs={4} item className={style.clipContainer} data-checked={checked} data-link={clip.url} data-title={clip.title}>
       <div className={style.clip}>
         <div className={style.clipImage}>
           <Checkbox
@@ -65,7 +65,7 @@ function Clip({ clip, openModal, _ }) {
           </div>
         </div>
       </div>
-    </div>
+    </Grid>
   );
 }
 

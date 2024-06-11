@@ -41,7 +41,7 @@ export default function ModalContent({ clip, setModalData }) {
               justifyContent: "center",
             }}
           >
-            <img width="90%" src={clip?.thumbnail_url.replace("%{width}", 240).replace("%{height}", 110)} alt={clip?.title} />
+            <img width="90%" src={clip?.thumbnail_url.replace("%{width}", 320).replace("%{height}", 180)} alt={clip?.title} />
           </Grid>
           <Grid item xs={4} className={modal.elementContainer}>
             <p><Person /> Created By</p>

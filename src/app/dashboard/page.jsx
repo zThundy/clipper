@@ -104,8 +104,13 @@ function Dashboard({ }) {
 
         // add the result to the clips array
         setClips((prev) => {
-          if (selectAll) data.forEach(_ => _.checked = true);
-          else data.forEach(_ => _.checked = false);
+          setSelectAll(prev => {
+            if (prev) data.forEach(_ => _.checked = true);
+            else data.forEach(_ => _.checked = false);
+            return prev;
+          });
+
+          setSelectedClips(data.filter(_ => _.checked));
           return data;
         });
       })

@@ -150,11 +150,9 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
 
         <Button
           variant="contained"
-          color="primary"
           onClick={downloadClips}
           startIcon={<Download />}
-          disableElevation
-          disabled={downloading}
+          disabled={true}
           className={classes.downloadButton}
         >
           Start download

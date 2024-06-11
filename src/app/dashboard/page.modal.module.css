@@ -5,18 +5,51 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 50rem;
-  height: 10rem;
+  width: 60rem;
+  /* height: 10rem; */
   margin: auto;
+  user-select: none;
+  border: none;
 }
 
 .modalStuffBg {
+  display: flex;
+  flex-direction: column;
+
   color: var(--mui-palette-text-main);
-  background-color: var(--mui-palette-background-light);
-  width: 50rem;
+  background-color: var(--mui-palette-background-main);
+  width: 80rem;
   height: fit-content;
   border-radius: 0.5rem;
   padding: 1rem;
+}
+
+.elementContainer {
+  padding: .5rem 1rem;
+  background-color: var(--mui-palette-background-light);
+  margin: .5rem .5rem 0 .5rem;
+  border-radius: 1rem;
+  width: 100%;
+
+  & p {
+    display: flex;
+    margin: 0 auto .5rem auto;
+    font-weight: bold;
+    border-bottom: 1px solid var(--mui-palette-text-main);
+    justify-content: left;
+    align-items: center;
+
+    & svg {
+      margin-right: .5rem;
+      margin-bottom: .2rem;
+    }
+  }
+
+  & img {
+    position: relative;
+    border: .5rem solid var(--mui-palette-primary-main);
+    border-radius: 1rem;
+  }
 }
 
 .clipInfoButton {

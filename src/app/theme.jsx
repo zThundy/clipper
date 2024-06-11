@@ -55,22 +55,17 @@ const theme = extendTheme({
           color: theme.vars.palette.text.main,
         }),
         contained: ({ theme }) => ({
-          backgroundColor: theme.vars.palette.primary.light,
-          color: theme.vars.palette.text.black,
+          // backgroundColor: theme.vars.palette.primary.light,
+          // color: theme.vars.palette.text.black,
           fontWeight: "bold",
           fontSize: "1.2rem",
-          borderRadius: "2rem",
+          // borderRadius: "2rem",
           padding: "1rem 2rem 1rem 2rem",
-          transition: "border-radius .2s, color .2s",
-          "&:hover": {
-            backgroundColor: theme.vars.palette.primary.light,
-            borderRadius: ".5rem",
-          },
-          "&.Mui-disabled": {
-            backgroundColor: theme.vars.palette.primary.dark,
-            color: theme.vars.palette.text.light,
-            boxShadow: "0 .3rem .4rem 0 rgba(0, 0, 0, .5)",
-          }
+          // transition: "border-radius .2s, color .2s",
+          // "&:hover": {
+          //   backgroundColor: theme.vars.palette.primary.light,
+          //   borderRadius: ".5rem",
+          // }
         }),
       }
     }

@@ -1,9 +1,14 @@
-import { Divider, Modal } from "@mui/material";
+import { Divider, Grid, Modal, Button } from "@mui/material";
 
 import modal from "./page.modal.module.css";
+import { BookSharp, CalendarToday, Person, PunchClock, Timeline, VideoCameraFront, ViewStream } from "@mui/icons-material";
 
 export default function ModalContent({ clip, setModalData }) {
-  console.log(clip)
+  const formatDate = (date) => {
+    let _date = new Date(date);
+    // format as "dd-mm-yyyy hh:mm:ss"
+    return `${_date.getDate()}-${_date.getMonth() + 1}-${_date.getFullYear()} ${_date.getHours()}:${_date.getMinutes()}:${_date.getSeconds()}`;
+  }
 
   return (
     <Modal
@@ -12,18 +17,69 @@ export default function ModalContent({ clip, setModalData }) {
       className={modal.modalContainer}
     >
       <div className={modal.modalStuffBg}>
-        <div className={modal.modalStuff}>
-          <h2>{clip?.title}</h2>
-          <Divider
+        <Grid container className={modal.modalStuff} justifyContent="space-between">
+          <Grid item xs={12} style={{
+            display: "flex",
+            flexDirection: "column",
+            padding: "0 0 1rem 0"
+          }}>
+            <h2
+              style={{
+                margin: "0 0 1rem 1rem",
+              }}
+            >{clip?.title}</h2>
+            <Divider
+              style={{
+                backgroundColor: "var(--mui-palette-background-paper)"
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} className={modal.elementContainer}
             style={{
-              backgroundColor: "var(--mui-palette-background-paper)"
+              padding: "3rem",
+              display: "flex",
+              justifyContent: "center",
             }}
-          />
-          <p>{clip?.description}</p>
-          {/* <img src={clip.thumbnail_url.replace("%{width}", 240).replace("%{height}", 110)} alt={clip.title} /> */}
-          <video src={clip?.url} controls width="100%" />
-          <a href={clip?.url} target="_blank" rel="noreferrer">Watch</a>
-        </div>
+          >
+            <img width="90%" src={clip?.thumbnail_url.replace("%{width}", 240).replace("%{height}", 110)} alt={clip?.title} />
+          </Grid>
+          <Grid item xs={4} className={modal.elementContainer}>
+            <p><Person /> Created By</p>
+            <span>{clip?.creator_name}</span>
+          </Grid>
+          <Grid item xs={3} className={modal.elementContainer}>
+            <p><Timeline /> Duration</p>
+            <span>{Math.floor(Number(clip?.duration))} seconds</span>
+          </Grid>
+          <Grid item xs={4} className={modal.elementContainer}>
+            <p><CalendarToday /> Created at</p>
+            <span>{formatDate(clip?.created_at)}</span>
+          </Grid>
+          <Grid item xs={5.6} className={modal.elementContainer}>
+            <p><ViewStream /> Views</p>
+            <span>{Math.floor(Number(clip?.view_count))}</span>
+          </Grid>
+          <Grid item xs={5.6} className={modal.elementContainer}>
+            <p><BookSharp /> Language</p>
+            <span>{clip?.language}</span>
+          </Grid>
+          <Grid item className={modal.elementContainer}>
+            <Button
+              variant="contained"
+              color="primary"
+              href={clip?.url}
+              target="_blank"
+              rel="noreferrer"
+              startIcon={<VideoCameraFront />}
+              style={{
+                width: "100%",
+                height: "3rem",
+              }}
+            >
+              Watch this clip on Twitch
+            </Button>
+          </Grid>
+        </Grid>
       </div>
     </Modal>
   )

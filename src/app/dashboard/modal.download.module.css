@@ -65,7 +65,7 @@
     width: 80%;
     height: 3rem;
     background-color: var(--mui-palette-success-main);
-    color: var(--mui-palette-text-primary);
+    /* color: var(--mui-palette-text-primary); */
     border: none;
     border-radius: 5px;
     margin: 1rem 0;

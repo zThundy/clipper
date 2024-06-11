@@ -20,7 +20,7 @@ export class ClipDownloader {
         ensureDirectoryExists(appPath('clips'));
 
         if (existsSync(appPath(mp4Path))) {
-            console.log(`Clip ${clip.title} found at ${appPath(mp4Path)}`);
+            console.log(`[clipDownload.ts] Clip ${clip.title} found at ${appPath(mp4Path)}`);
             return;
         }
 
@@ -33,7 +33,7 @@ export class ClipDownloader {
         if (url) {
             const downloader = new Downloader(url, mp4Path);
 
-            console.log(`[clipDownload] Downloading clip ${clip.title}`);
+            console.log(`[clipDownload.ts] Downloading clip ${clip.title}`);
             promises.push(downloader.download());
         }
 

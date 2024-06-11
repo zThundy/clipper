@@ -73,13 +73,15 @@ export function XhrSource(url, opts) {
 
 function ModalDownload({ open, setClipsDownload, selectedClips }) {
   const [opened, setOpened] = useState(open || false);
-  const [progresses, setProgresses] = useState({});
   const [downloading, setDownloading] = useState(false);
 
+  const [modalState, setModalState] = useState("clips");
+  const [progresses, setProgresses] = useState({});
+  const [processed, setProcessed] = useState(0);
+
   useEffect(() => {
-    resetStates();
-    // if (open) downloadClips();
     setOpened(open);
+    resetStates();
   }, [opened, open]);
 
   const resetStates = () => {
@@ -88,6 +90,8 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
       _p[clip.id] = "Ready";
     }
     setProgresses(_p);
+    setProcessed(0);
+    setModalState("clips");
   }
 
   const downloadClips = () => {
@@ -102,35 +106,67 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
 
     xs.addEventListener('error', e => {
       console.error(e);
-      setDownloading(false);
+      // setDownloading(false);
     });
 
     xs.addEventListener('close', e => {
       console.log("Connection closed");
-      setDownloading(false);
+      // setDownloading(false);
     });
 
     xs.addEventListener('message', e => {
       const data = JSON.parse(e.data);
       // console.log(data);
 
-      setProgresses(prev => {
-        switch (data.status) {
-          case "downloading":
-            prev[data.id] = "Downloading";
-            break;
-          case "success":
-            prev[data.id] = "Finished";
-            break;
-          case "error":
-            prev[data.id] = "Error";
-            break;
-          default:
-            prev[data.id] = "Ready";
+      setModalState(data.type);
+
+      if (data.type === "clips") {
+        setProgresses(prev => {
+          switch (data.status) {
+            case "downloading":
+              prev[data.id] = "Downloading";
+              break;
+            case "success":
+              prev[data.id] = "Finished";
+              break;
+            case "error":
+              prev[data.id] = "Error";
+              break;
+            default:
+              prev[data.id] = "Ready";
+          }
+          return { ...prev };
+        })
+      } else if (data.type === "compressing") {
+        // filter the number of processed clips
+        if (data.status === "success") {
+          setProcessed(prev => prev + 1);
         }
-        console.log(prev);
-        return { ...prev };
-      })
+      } else if (data.type === "final") {
+        setDownloading(false);
+        // setClipsDownload(false);
+      }
+    });
+  }
+
+  const downloadZip = () => {
+    fetch('/api/download', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    }).then(response => {
+      setClipsDownload(false);
+      return response.blob();
+    })
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'clips.zip';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+      console.error('Error:', error);
     });
   }
 
@@ -140,26 +176,78 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
       onClose={() => setClipsDownload(false)}
       className={classes.modal}
     >
-
-      <div className={classes.modalContent}>
-        <List className={classes.list}>
-          {selectedClips.map((clip) => (
-            <DownloadItem key={clip.id} _p={progresses[clip.id]} clip={clip} />
-          ))}
-        </List>
-
-        <Button
-          variant="contained"
-          onClick={downloadClips}
-          startIcon={<Download />}
-          disabled={true}
-          className={classes.downloadButton}
-        >
-          Start download
-        </Button>
-      </div>
-
+      <>
+        {
+          modalState === "clips" ?
+            <DownloadList
+              selectedClips={selectedClips}
+              downloading={downloading}
+              downloadClips={downloadClips}
+              progresses={progresses}
+            />
+            : null
+        }
+        {
+          modalState === "compressing" ?
+            <CompressingList
+              processed={processed}
+              maxProcessed={selectedClips.length}
+            />
+            : null
+        }
+        {
+          modalState === "final" ?
+            <div className={classes.modalContent}>
+              <h1 className={classes.text}>Download finished</h1>
+              <Button
+                variant="contained"
+                onClick={downloadZip}
+                className={classes.downloadButton}
+              >
+                Download zip
+              </Button>
+            </div>
+            : null
+        }
+      </>
     </Modal>
+  )
+}
+
+function CompressingList({ processed, maxProcessed }) {
+  return (
+    <div className={classes.compressingModalContent}>
+      <h1 className={classes.text}>Compressing clips...</h1>
+      <LinearProgress
+        variant="determinate"
+        color="primary"
+        className={classes.progress}
+        value={Math.floor((processed / maxProcessed) * 100)}
+      />
+    </div>
+  )
+}
+
+function DownloadList({ selectedClips, downloading, downloadClips, progresses }) {
+
+  return (
+    <div className={classes.modalContent}>
+      <List className={classes.list}>
+        {selectedClips.map((clip) => (
+          <DownloadItem key={clip.id} _p={progresses[clip.id]} clip={clip} />
+        ))}
+      </List>
+
+      <Button
+        variant="contained"
+        onClick={downloadClips}
+        startIcon={<Download />}
+        disabled={downloading}
+        className={classes.downloadButton}
+      >
+        Start download
+      </Button>
+    </div>
   )
 }
 
@@ -167,9 +255,7 @@ function DownloadItem({ _p, clip }) {
   const [progress, setProgress] = useState(_p || "Ready");
 
   useEffect(() => {
-    console.log("DownloadItem progress", _p, progress);
     setProgress(_p);
-
     // focus on the item
     if (_p === "Downloading") {
       document.getElementById(clip.id).scrollIntoView({ behavior: "smooth" });

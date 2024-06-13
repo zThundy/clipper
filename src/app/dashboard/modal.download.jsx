@@ -133,6 +133,9 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
             case "error":
               prev[data.id] = "Error";
               break;
+            case "errored":
+              setDownloading(false);
+              break;
             default:
               prev[data.id] = "Ready";
           }
@@ -274,6 +277,7 @@ function DownloadItem({ _p, clip }) {
       {progress === "Downloading" ? <LinearProgress className={classes.progress} /> : null}
       {progress === "Ready" ? <LinearProgress className={classes.progress} variant="determinate" value={0} color="error" /> : null}
       {progress === "Finished" ? <LinearProgress className={classes.progress} color="success" variant="determinate" value={100} /> : null}
+      {progress === "Error" ? <LinearProgress className={classes.progress} color="error" variant="determinate" value={100} /> : null}
     </div>
   )
 }

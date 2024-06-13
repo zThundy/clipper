@@ -51,6 +51,7 @@ export default async function handler(
 
     if (req.method === 'POST') {
       const selectedClips: ClipDataResponse[] = req.body;
+      const errors: string[] = [];
 
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
@@ -72,16 +73,25 @@ export default async function handler(
           }
           res.write(`data: ${JSON.stringify(resp)}\n\n`);
         } catch (e: any) {
+          console.error(`Failed to download clip ${clip.id}`, e);
           const resp = {
             id: clip.id,
-            status: 'failed',
+            status: 'error',
             error: e.message,
             type: "clips"
           }
           res.write(`data: ${JSON.stringify(resp)}\n\n`);
-          res.end();
-          return;
+          errors.push(e.message);
+          await sleep(500);
+          continue;
         }
+      }
+
+      // if there are any errors, terminate the process
+      if (errors.length > 0) {
+        res.write('data: {"status": "errored", "type": "clips"}\n\n');
+        res.end();
+        return;
       }
 
       res.write('data: {"status": "done", "type": "clips"}\n\n');
@@ -142,7 +152,7 @@ export default async function handler(
 
       // Get the file extension
       const fileExtension = zipFileName.split(".").pop()?.toLowerCase();
-      
+
       // Define a mapping of file extensions to content types
       const contentTypeMap: { [key: string]: string } = {
         svg: "image/svg+xml",

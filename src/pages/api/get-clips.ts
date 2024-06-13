@@ -44,10 +44,16 @@ export default async function handler(
                 const expiryDate = new Date(Date.now() + 60 * 60 * 1000).toUTCString() // 1 hour from now
                 res.setHeader('Set-Cookie', `access_token=${newAccessToken}; Path=/; HttpOnly; Expires=${expiryDate}`);
 
+                console.log('Access token refreshed')
                 // Retry the request to get the clips
                 const data = await getAllClips({ access_token, refresh_token, user_id: id }, { left: new Date(), right: new Date() });
                 res.status(200).json(data as any);
             } else {
+                // clear the cookies
+                res.setHeader('Set-Cookie', `access_token=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT`);
+                res.setHeader('Set-Cookie', `refresh_token=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT`);
+                res.setHeader('Set-Cookie', `user_data=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT`);
+
                 // console.error('Failed to get clips', error);
                 res.status(500).json({
                     type: "error",
@@ -133,8 +139,12 @@ async function paginate(auth: AuthData, period: Period, cursor: ClipData["pagina
             started_at: fns.formatRFC3339(left),
             ended_at: fns.formatRFC3339(right)
         });
-    } catch (e) {
+    } catch (e: any) {
         console.error('Error while paginating the API', e);
+        // throw e;
+        if (e.message === 'Access token expired') {
+            throw e;
+        }
         return false;
     }
 }

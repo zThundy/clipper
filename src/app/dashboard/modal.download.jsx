@@ -74,6 +74,7 @@ export function XhrSource(url, opts) {
 function ModalDownload({ open, setClipsDownload, selectedClips }) {
   const [opened, setOpened] = useState(open || false);
   const [downloading, setDownloading] = useState(false);
+  const [finalPressed, setFinalPressed] = useState(false);
 
   const [modalState, setModalState] = useState("clips");
   const [progresses, setProgresses] = useState({});
@@ -154,6 +155,8 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
   }
 
   const downloadZip = () => {
+    setFinalPressed(true);
+
     fetch('/api/download', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -168,10 +171,12 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
       a.click();
       window.URL.revokeObjectURL(url);
       setClipsDownload(false);
+      setFinalPressed(false);
     })
     .catch(error => {
       console.error('Error:', error);
       setClipsDownload(false);
+      setFinalPressed(false);
     });
   }
 
@@ -211,6 +216,7 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
                 variant="contained"
                 onClick={downloadZip}
                 className={classes.downloadButton}
+                disabled={finalPressed}
               >
                 Download zip
               </Button>

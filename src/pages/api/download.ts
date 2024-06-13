@@ -117,8 +117,8 @@ export default async function handler(
         const clipMetaPath = appPath(`clips/${clip.id}.json`);
         archive.append(fs.createReadStream(clipPath), { name: `${clip.id}.mp4` });
         archive.append(fs.createReadStream(clipMetaPath), { name: `${clip.id}.json` });
-        await sleep(100);
         res.write(`data: {"id": "${clip.id}", "status": "success", "type": "compressing"}\n\n`);
+        await sleep(300);
       }
 
       // finalize the archive (ie we are done appending files but streams have to finish yet)

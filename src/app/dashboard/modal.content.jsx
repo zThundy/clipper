@@ -4,6 +4,11 @@ import Image from "next/image";
 import modal from "./page.modal.module.css";
 import { BookSharp, CalendarToday, Person, Timeline, VideoCameraFront, ViewStream } from "@mui/icons-material";
 
+const clipSizes = {
+  width: 320,
+  height: 180
+}
+
 export default function ModalContent({ clip, setModalData }) {
   const formatDate = (date) => {
     let _date = new Date(date);
@@ -42,7 +47,11 @@ export default function ModalContent({ clip, setModalData }) {
               justifyContent: "center",
             }}
           >
-            <Image width="90%" src={clip?.thumbnail_url.replace("%{width}", 320).replace("%{height}", 180)} alt={clip?.title} />
+            <Image
+              width={clipSizes.width}
+              height={clipSizes.height}
+              src={clip?.thumbnail_url.replace("%{width}", clipSizes.width).replace("%{height}", clipSizes.height)} alt={clip?.title}
+            />
           </Grid>
           <Grid item xs={4} className={modal.elementContainer}>
             <p><Person /> Created By</p>

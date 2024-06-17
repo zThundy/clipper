@@ -55,6 +55,9 @@ export default function Home({ }) {
             The platform offers powerful tools for categorizing clips, trimming and combining footage, and adding custom thumbnails and annotations.<br />
             Additionally, Clipmaner provides advanced search features and analytics to track the performance of clips, making it easier for streamers to highlight their best moments and engage their audience.<br />
             Whether you&apos;re a seasoned streamer or just starting, Clipmaner streamlines the clip management process, allowing you to focus on creating great content.
+            <br />
+            <br />
+            Oh by the way, this was ChatGPT, nothing is real... You can just download clips and (soon™) delete them.
           </div>
         </Container>
 

@@ -60,6 +60,14 @@ export default async function handler(
 
       res.write('data: {"status": "start", "type": "clips"}\n\n');
 
+      const maxClips = parseInt(process.env.MAX_CLIPS_DOWNLOAD || '10');
+      // if tthe number of clips is greater than process.env.MAX_CLIPS_DOWNLOAD, return an error
+      if (selectedClips.length > maxClips) {
+        res.write('data: {"status": "error", "message": "Too many clips selected, max: ' + maxClips + ' clips (or 2 pages)", "type": "message"}\n\n');
+        res.end();
+        return;
+      }
+
       for (const clip of selectedClips) {
         try {
           const downloader = new ClipDownloader(clip);

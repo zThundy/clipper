@@ -71,7 +71,7 @@ export function XhrSource(url, opts) {
   return eventTarget;
 }
 
-function ModalDownload({ open, setClipsDownload, selectedClips }) {
+function ModalDownload({ open, setClipsDownload, selectedClips, setErrorMessage }) {
   const [opened, setOpened] = useState(open || false);
   const [downloading, setDownloading] = useState(false);
   const [finalPressed, setFinalPressed] = useState(false);
@@ -81,7 +81,7 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
   const [processed, setProcessed] = useState(0);
 
   useEffect(() => {
-    console.log("ModalDownload opened:", opened, open)
+    // console.log("ModalDownload opened:", opened, open)
     setOpened(open);
     resetStates();
   }, [opened, open]);
@@ -119,6 +119,12 @@ function ModalDownload({ open, setClipsDownload, selectedClips }) {
     xs.addEventListener('message', e => {
       const data = JSON.parse(e.data);
       // console.log(data);
+
+      if (data.type === "message") {
+        setErrorMessage(data.message);
+        setDownloading(false);
+        return;
+      }
 
       setModalState(data.type);
 

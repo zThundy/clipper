@@ -151,7 +151,11 @@ function Dashboard({ }) {
       </Snackbar>
 
       <ModalClipContent clip={modalData} setModalData={setModalData} />
-      <ModalDownloadContent open={clipsDownload} selectedClips={selectedClips} setClipsDownload={setClipsDownload} />
+      <ModalDownloadContent open={clipsDownload} selectedClips={selectedClips} setClipsDownload={setClipsDownload} setErrorMessage={(message) => {
+        setNotifType("error");
+        handleOpen(message);
+        setClipsDownload(false);
+      }} />
 
       <div className={style.header}>
         <div style={{

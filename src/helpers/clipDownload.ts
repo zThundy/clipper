@@ -22,6 +22,7 @@ export class ClipDownloader {
 
             if (existsSync(appPath(mp4Path))) {
                 console.log(`[clipDownload.ts] Clip ${clip.title} found at ${appPath(mp4Path)}`);
+                res();
                 return;
             }
 

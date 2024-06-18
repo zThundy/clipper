@@ -1,7 +1,7 @@
 import { Divider, Grid, Modal, Button } from "@mui/material";
 
 import Image from "next/image";
-import modal from "./page.modal.module.css";
+import modal from "./modal.content.module.css";
 import { BookSharp, CalendarToday, Person, Timeline, VideoCameraFront, ViewStream } from "@mui/icons-material";
 
 const clipSizes = {

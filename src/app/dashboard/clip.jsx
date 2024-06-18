@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 
 import style from "./page.module.css";
-import modal from "./page.modal.module.css";
+import modal from "./modal.content.module.css";
 
 import { Checkbox, Grid } from "@mui/material";
 import { Info } from "@mui/icons-material";

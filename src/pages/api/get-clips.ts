@@ -3,12 +3,30 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import * as fns from 'date-fns';
 
 import {
+    ensureDirectoryExists,
+    readFile,
+    exists,
+    writeFile
+} from "../../helpers/filesystem";
+
+import {
+    create as cacheCreate,
+    get as cacheGet,
+    add as cacheAdd,
+    write as cacheWrite
+} from "../../helpers/cache";
+
+import {
+    appPath,
+} from "../../helpers/utils";
+
+import {
     ClipDataResponse,
     ClipData,
     Period,
     ClipRequest,
     AuthData,
-    Dict,
+    Dict
 } from '../../helpers/types'
 
 export default async function handler(
@@ -17,7 +35,9 @@ export default async function handler(
 ) {
     if (req.method === 'GET') {
         // get the page number from the url query
-        const { access_token, refresh_token, user_data } = parseCookies(req)
+        const { access_token, refresh_token, user_data } = parseCookies(req);
+        // get date from the url query
+        let { left, right, cursor, currentPage } = req.query;
         if (!access_token || !refresh_token || !user_data) {
             console.error('Access token, refresh token or user data not found in cookies');
             res.status(401).json({
@@ -29,13 +49,30 @@ export default async function handler(
             return;
         }
 
+        if (isNaN(Number(currentPage))) {
+            return res.status(400).json({
+                type: "error",
+                redirect: true,
+                redirectPath: "/",
+                message: "Invalid page number"
+            } as any);
+        }
+
         // get created_at from user_data
         const { created_at, id } = JSON.parse(decodeURIComponent(user_data)) as Dict<string>;
 
+        // create base period
+        let period: Period = { left: new Date(), right: new Date() };
+        if (left) period.left = new Date(left as string)
+        else period.left = new Date(created_at);
+        if (right) period.right = new Date(right as string);
+        if (!cursor) cursor = "";
+
         try {
-            const data = await getAllClips({ access_token, refresh_token, user_id: id }, { left: new Date(created_at), right: new Date() });
+            const data = await getAllClips({ access_token, refresh_token, user_id: id }, period, cursor as string, Number(currentPage));
             res.status(200).json(data as any);
         } catch (error: any) {
+            console.error('Failed to get clips', error);
             if (error.message === 'Access token expired') {
                 // The access token is expired, use the refresh token to get a new one
                 const newAccessToken = await refreshAccessToken(refresh_token);
@@ -46,7 +83,7 @@ export default async function handler(
 
                 console.log('Access token refreshed')
                 // Retry the request to get the clips
-                const data = await getAllClips({ access_token, refresh_token, user_id: id }, { left: new Date(), right: new Date() });
+                const data = await getAllClips({ access_token, refresh_token, user_id: id }, period, cursor as string, Number(currentPage));
                 res.status(200).json(data as any);
             } else {
                 // clear the cookies
@@ -99,42 +136,90 @@ function iterable(obj: any): boolean {
     return typeof obj[Symbol.iterator] === 'function';
 }
 
-async function clips(auth: AuthData, req: ClipRequest): Promise<ClipData> {
-    const headers = new Headers({
-        'Authorization': `Bearer ${auth.access_token}`,
-        'Client-Id': process.env.TWITCH_CLIENT_ID || '',
-    });
+async function getAllClips(auth: AuthData, period: Period, cursor: string | undefined | null, currentPage: number): Promise<[ClipDataResponse[], Boolean | String]> {
+    const clipsFromBatch: ClipDataResponse[] = [];
+    let thereIsMore: String | Boolean = false;
+    let retries: number = 0;
+    cacheCreate(auth.user_id);
+    let cache = cacheGet(auth.user_id);
 
-    const parameters = new URLSearchParams();
+    if (typeof cursor === 'string' && cursor.length === 0) cursor = undefined;
+    ensureDirectoryExists(appPath('cache'));
 
-    for (const [key, value] of Object.entries(req)) {
-        if (value) parameters.append(key, value as string);
-    }
+    try {
+        do {
+            if (retries > 5) {
+                console.error('Too many retries, stopping the pagination');
+                thereIsMore = false;
+                cursor = null;
+                break;
+            }
+            
+            if (cache.find(auth.user_id, currentPage.toString())) {
+                console.log(`Page ${currentPage} already exists in cache, skipping...`);
+                cursor = cacheGet(auth.user_id).find((c) => c.page === currentPage.toString())?.cursor;
+                if (clipsFromBatch.length >= Number(process.env.MAX_CLIP_TOTAL || 100)) {
+                    console.error(`Reached ${process.env.MAX_CLIP_TOTAL || 100} clips, stopping the pagination`);
+                    thereIsMore = <string>cursor;
+                    cursor = null;
+                    break;
+                }
+                continue;
+            }
 
-    const url = `${process.env.BASE_URL as string}?${parameters.toString()}`;
-    // console.log("URL: ", url);
+            // This somehow fixes type-hinting in PhpStorm
+            const responsePromise = paginate(auth, period, cursor);
+            const response = await responsePromise;
 
-    const response = await fetch(url, { headers });
+            if (response === false) {
+                console.error('Error while paginating, waiting a few seconds before continuing...');
+                await sleep(10000);
+                retries++;
+                continue;
+            }
 
-    if (!response.ok) {
-        if (response.status === 401) {
-            throw new Error('Access token expired');
+            if (!iterable(response.data)) {
+                console.error('API returned 200 but data is not iterable, waiting before trying again...');
+                await sleep(10000);
+                retries++;
+                continue;
+            }
+
+            // save cursor for the next request
+            cursor = response?.pagination?.cursor;
+            if (clipsFromBatch.length >= Number(process.env.MAX_CLIP_TOTAL || 100)) {
+                console.error(`Reached ${process.env.MAX_CLIP_TOTAL || 100} clips, stopping the pagination`);
+                thereIsMore = cursor;
+                cursor = null;
+                break;
+            }
+
+            for (const clip of response.data) {
+                clipsFromBatch.push(clip);
+            }
+
+            retries = 0;
+            cacheAdd(auth.user_id, currentPage.toString(), cursor);
+        } while (cursor);
+        
+        cacheWrite(auth.user_id);
+        return [clipsFromBatch, thereIsMore];
+    } catch (e) {
+        if (clipsFromBatch.length) {
+            return [clipsFromBatch, thereIsMore];
+        } else {
+            throw e;
         }
-
-        throw new Error(`Failed to fetch clips: ${response.status} ${response.statusText}`);
     }
-
-    const data = await response.json()
-    return data;
 }
 
-async function paginate(auth: AuthData, period: Period, cursor: ClipData["pagination"]["cursor"]): Promise<ClipData | false> {
+async function paginate(auth: AuthData, period: Period, cursor: string | undefined | null): Promise<ClipData | false> {
     try {
         const { left, right } = period;
 
         return await clips(auth, {
             broadcaster_id: auth.user_id,
-            first: process.env.MAX_CLIPS_NUMBER as string,
+            first: process.env.MAX_CLIP_PER_FETCH as string,
             after: cursor,
             started_at: fns.formatRFC3339(left),
             ended_at: fns.formatRFC3339(right)
@@ -149,46 +234,28 @@ async function paginate(auth: AuthData, period: Period, cursor: ClipData["pagina
     }
 }
 
-async function getAllClips(auth: AuthData, period: Period): Promise<ClipDataResponse[]> {
-    const clipsFromBatch: ClipDataResponse[] = [];
-    let cursor: ClipData["pagination"]["cursor"] = "";
+async function clips(auth: AuthData, req: ClipRequest): Promise<ClipData> {
+    const headers = new Headers({
+        'Authorization': `Bearer ${auth.access_token}`,
+        'Client-Id': process.env.TWITCH_CLIENT_ID || '',
+    });
 
-    try {
-        do {
-            // This somehow fixes type-hinting in PhpStorm
-            const responsePromise = paginate(auth, period, cursor);
-            const response = await responsePromise;
-
-            if (response === false) {
-                console.error('Error while paginating, waiting a few seconds before continuing...');
-                await sleep(10000);
-                continue;
-            }
-
-            if (!iterable(response.data)) {
-                console.error('API returned 200 but data is not iterable, waiting before trying again...');
-                await sleep(10000);
-                continue;
-            }
-
-            for (const clip of response.data) {
-                clipsFromBatch.push(clip);
-            }
-
-            cursor = response?.pagination?.cursor;
-
-            // dev
-            // break;
-        } while (cursor);
-
-        return clipsFromBatch;
-    } catch (e) {
-        if (clipsFromBatch.length) {
-            return clipsFromBatch;
-        } else {
-            throw e;
-        }
+    const parameters = new URLSearchParams();
+    for (const [key, value] of Object.entries(req)) {
+        if (value) parameters.append(key, value as string);
     }
+
+    console.log("Parameters: ", parameters.toString());
+    const url = `${process.env.BASE_URL as string}?${parameters.toString()}`;
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+        if (response.status === 401) throw new Error('Access token expired');
+        throw new Error(`Failed to fetch clips: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json()
+    return data;
 }
 
 async function refreshAccessToken(refresh_token: string): Promise<string> {

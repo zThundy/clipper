@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import Image from "next/image";
 
 import { useEffect, useState } from 'react';
-import { Container, Grid, Button, Avatar, Badge } from '@mui/material';
+import { Grid, Button, Avatar, Badge } from '@mui/material';
 import styled from '@emotion/styled';
 import { Dashboard, Login } from '@mui/icons-material';
 

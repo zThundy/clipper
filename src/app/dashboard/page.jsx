@@ -1,27 +1,16 @@
 "use client";
+"disable strict";
 
 import { useMemo, useState, useEffect } from "react";
-import { Button, Checkbox, FormControlLabel, Switch, Snackbar, Alert, Grid, Pagination, Skeleton } from "@mui/material";
-import { Delete, Download, Home } from "@mui/icons-material";
+import { Button, Checkbox, FormControlLabel, Switch, Snackbar, Alert, Grid, Pagination, Skeleton, Tooltip } from "@mui/material";
+import { Delete, Download, FilterAlt, Home } from "@mui/icons-material";
 
 import ModalClipContent from "./modal.content";
 import ModalDownloadContent from "./modal.download";
+import ModalFilterContent from "./modal.filter";
 import Clip from "./clip";
 
 import style from "./page.module.css";
-
-// const StyledPageButton = styled(Button)(({ theme }) => ({
-//   color: theme.vars.palette.text.main,
-//   backgroundColor: theme.vars.palette.primary.main,
-//   fontWeight: "bold",
-//   fontSize: "1.2rem",
-//   borderRadius: "1rem",
-//   padding: ".5rem 1rem .5rem 1rem",
-//   transition: "border-radius .2s, color .2s",
-//   "&:hover": {
-//     backgroundColor: theme.vars.palette.primary.light,
-//   }
-// }));
 
 const clipsDimenstions = {
   width: 380,
@@ -76,6 +65,7 @@ function Loading({ }) {
 function Dashboard({ }) {
   const [selectAll, setSelectAll] = useState(false);
   const [clips, setClips] = useState([]);
+  const [thereIsMore, setThereIsMore] = useState("");
   const [modalData, setModalData] = useState(null);
 
   const [open, setOpen] = useState(false);
@@ -87,31 +77,32 @@ function Dashboard({ }) {
   const [selectedClips, setSelectedClips] = useState([]);
 
   const [clipsDownload, setClipsDownload] = useState(false);
+  const [openFilterModal, setOpenFilterModal] = useState(false);
 
-  useEffect(() => {
-    console.log("fetching clips... or changing page...");
-    localStorage.setItem("loggedIn", "true");
-
+  const fetchClips = () => {
     // get the clips on page load using the api call /api/get-clips
-    fetch(`/api/get-clips`)
+    fetch(`/api/get-clips?cursor=${thereIsMore}&currentPage=${currentPage}`)
       .then(async res => {
         if (!res.ok) throw await res.json();
         return res.json();
       })
       .then(data => {
         if (!data) throw new Error("No data found in the response");
-        console.log(data);
+        let clips = data[0];
+        let _thereIsMore = data[1];
+
+        setThereIsMore(() => _thereIsMore);
 
         // add the result to the clips array
         setClips((prev) => {
           setSelectAll(prev => {
-            if (prev) data.forEach(_ => _.checked = true);
-            else data.forEach(_ => _.checked = false);
+            if (prev) clips.forEach(_ => _.checked = true);
+            else clips.forEach(_ => _.checked = false);
             return prev;
           });
 
-          setSelectedClips(data.filter(_ => _.checked));
-          return data;
+          setSelectedClips(clips.filter(_ => _.checked));
+          return [...prev, ...clips];
         });
       })
       .catch(err => {
@@ -120,7 +111,23 @@ function Dashboard({ }) {
         if (err.redirect) window.location.href = err.redirectPath;
         setClips([]);
       });
+
+  }
+
+  useEffect(() => {
+    console.log("Dashboard mounted")
+    localStorage.setItem("loggedIn", "true");
+
+    return () => {
+      // REACT... FUCK YOU... GODDAMIT... FUUUUUUUUUUCKKKKKKKKKKK YOOOOOOOUUUUUUUUU
+      fetchClips();
+      console.log("Dashboard unmounted")
+    };
   }, []);
+
+  useEffect(() => {
+    if (currentPage % 2 === 0) fetchClips();
+  }, [currentPage])
 
   const handleClose = (e, reason) => {
     if (reason === 'clickaway') return;
@@ -150,6 +157,7 @@ function Dashboard({ }) {
         </Alert>
       </Snackbar>
 
+      <ModalFilterContent open={openFilterModal} onClose={() => setOpenFilterModal(false)} />
       <ModalClipContent clip={modalData} setModalData={setModalData} />
       <ModalDownloadContent open={clipsDownload} selectedClips={selectedClips} setClipsDownload={setClipsDownload} setErrorMessage={(message) => {
         setNotifType("error");
@@ -163,16 +171,18 @@ function Dashboard({ }) {
           flexDirection: "row",
           margin: "0 0 0 1rem",
         }}>
-          <Button
-            className={style.homeButton}
-            color="primary"
-            varuant="contained"
-            onClick={() => {
-              window.location.href = "/";
-            }}
-          >
-            <Home />
-          </Button>
+          <Tooltip title="Homepage">
+            <Button
+              className={style.homeButton}
+              color="primary"
+              varuant="contained"
+              onClick={() => {
+                window.location.href = "/";
+              }}
+            >
+              <Home />
+            </Button>
+          </Tooltip>
 
           <div className={style.selectAllContainer}>
             <FormControlLabel
@@ -191,6 +201,19 @@ function Dashboard({ }) {
               label="Select all"
             />
           </div>
+
+          <Tooltip title="Filter">
+            <Button
+              className={style.filterButton}
+              color="primary"
+              variant="contained"
+              onClick={() => {
+                setOpenFilterModal(true);
+              }}
+            >
+              <FilterAlt />
+            </Button>
+          </Tooltip>
         </div>
 
         <div

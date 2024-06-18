@@ -35,7 +35,7 @@ export type Period = {
 export type ClipRequest = {
     broadcaster_id: string,
     first: string,
-    after: string,
+    after: string | undefined | null,
     started_at: string | undefined | null,
     ended_at: string | undefined | null,
 }
@@ -45,6 +45,13 @@ export type AuthData = {
     refresh_token: string,
     user_id: string
 }
+
+export type Cache = { [key: string]: WriteableCache | [] };
+
+export type WriteableCache = [
+    page: string | number,
+    cursor: string
+];
 
 export interface YoutubeDlClipDump {
     'http_headers': YoutubeDlDumpHttpHeaders,

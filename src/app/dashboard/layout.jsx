@@ -7,7 +7,6 @@ export const metadata = {
 };
 
 export default async function DashboardLayout({ children }) {
-
   return (
     <div className={style.container}>
       {children}

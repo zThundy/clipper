@@ -65,7 +65,6 @@ function Loading({ }) {
 function Dashboard({ }) {
   const [selectAll, setSelectAll] = useState(false);
   const [clips, setClips] = useState([]);
-  const [thereIsMore, setThereIsMore] = useState("");
   const [modalData, setModalData] = useState(null);
 
   const [open, setOpen] = useState(false);
@@ -81,17 +80,14 @@ function Dashboard({ }) {
 
   const fetchClips = () => {
     // get the clips on page load using the api call /api/get-clips
-    fetch(`/api/get-clips?cursor=${thereIsMore}&currentPage=${currentPage}`)
+    fetch(`/api/get-clips?currentPage=${currentPage}`)
       .then(async res => {
         if (!res.ok) throw await res.json();
         return res.json();
       })
       .then(data => {
         if (!data) throw new Error("No data found in the response");
-        let clips = data[0];
-        let _thereIsMore = data[1];
-
-        setThereIsMore(() => _thereIsMore);
+        let clips = data;
 
         // add the result to the clips array
         setClips((prev) => {
@@ -102,7 +98,7 @@ function Dashboard({ }) {
           });
 
           setSelectedClips(clips.filter(_ => _.checked));
-          return [...prev, ...clips];
+          return clips;
         });
       })
       .catch(err => {

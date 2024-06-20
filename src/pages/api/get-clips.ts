@@ -13,7 +13,10 @@ import {
     create as cacheCreate,
     get as cacheGet,
     add as cacheAdd,
-    write as cacheWrite
+    save as cacheWrite,
+    saveAll as cacheWriteAll,
+    find as cacheFind,
+    dump as cacheDump
 } from "../../helpers/cache";
 
 import {
@@ -69,7 +72,7 @@ export default async function handler(
         if (!cursor) cursor = "";
 
         try {
-            const data = await getAllClips({ access_token, refresh_token, user_id: id }, period, cursor as string, Number(currentPage));
+            const data = await getAllClips({ access_token, refresh_token, user_id: id }, period, Number(currentPage));
             res.status(200).json(data as any);
         } catch (error: any) {
             console.error('Failed to get clips', error);
@@ -83,7 +86,7 @@ export default async function handler(
 
                 console.log('Access token refreshed')
                 // Retry the request to get the clips
-                const data = await getAllClips({ access_token, refresh_token, user_id: id }, period, cursor as string, Number(currentPage));
+                const data = await getAllClips({ access_token, refresh_token, user_id: id }, period, Number(currentPage));
                 res.status(200).json(data as any);
             } else {
                 // clear the cookies
@@ -136,39 +139,36 @@ function iterable(obj: any): boolean {
     return typeof obj[Symbol.iterator] === 'function';
 }
 
-async function getAllClips(auth: AuthData, period: Period, cursor: string | undefined | null, currentPage: number): Promise<[ClipDataResponse[], Boolean | String]> {
+async function getAllClips(auth: AuthData, period: Period, currentPage: number): Promise<ClipDataResponse[]> {
     const clipsFromBatch: ClipDataResponse[] = [];
-    let thereIsMore: String | Boolean = false;
     let retries: number = 0;
-    cacheCreate(auth.user_id);
-    let cache = cacheGet(auth.user_id);
+    cacheGet(auth.user_id, appPath('cache'));
+    cacheGet(`clips_${auth.user_id}`, appPath('cache'));
+    let cursor: string | null = null;
 
-    if (typeof cursor === 'string' && cursor.length === 0) cursor = undefined;
     ensureDirectoryExists(appPath('cache'));
 
     try {
         do {
             if (retries > 5) {
                 console.error('Too many retries, stopping the pagination');
-                thereIsMore = false;
-                cursor = null;
                 break;
             }
-            
-            if (cache.find(auth.user_id, currentPage.toString())) {
-                console.log(`Page ${currentPage} already exists in cache, skipping...`);
-                cursor = cacheGet(auth.user_id).find((c) => c.page === currentPage.toString())?.cursor;
-                if (clipsFromBatch.length >= Number(process.env.MAX_CLIP_TOTAL || 100)) {
-                    console.error(`Reached ${process.env.MAX_CLIP_TOTAL || 100} clips, stopping the pagination`);
-                    thereIsMore = <string>cursor;
-                    cursor = null;
-                    break;
-                }
+
+            const cacheCursor = cacheFind(auth.user_id, currentPage.toString());
+            if (cacheCursor?.data === "end" || cursor === "end") {
+                console.warn(`Cache cursor is "${cacheCursor?.data}", skipping pagination (?) Maybe end of the list (?)`);
+                break;
+            }
+
+            if (cacheCursor?.data) {
+                console.log(`Cache found for ${auth.user_id} page ${currentPage} cursor ${cursor}; Not fetching new data`);
+                currentPage++;
+                cursor = cacheCursor?.data;
                 continue;
             }
 
-            // This somehow fixes type-hinting in PhpStorm
-            const responsePromise = paginate(auth, period, cursor);
+            const responsePromise = paginate(auth, period, cacheCursor?.data || cursor);
             const response = await responsePromise;
 
             if (response === false) {
@@ -189,24 +189,44 @@ async function getAllClips(auth: AuthData, period: Period, cursor: string | unde
             cursor = response?.pagination?.cursor;
             if (clipsFromBatch.length >= Number(process.env.MAX_CLIP_TOTAL || 100)) {
                 console.error(`Reached ${process.env.MAX_CLIP_TOTAL || 100} clips, stopping the pagination`);
-                thereIsMore = cursor;
                 cursor = null;
                 break;
             }
 
-            for (const clip of response.data) {
-                clipsFromBatch.push(clip);
+            if (cursor === undefined || cursor === null) {
+                cursor = "end";
+                response.pagination.cursor = "end";
+            }
+            // console.log(`Adding cache for ${auth.user_id} page ${currentPage} cursor ${cursor}`);
+            cacheAdd(auth.user_id, currentPage.toString(), cursor);
+            cacheAdd(`clips_${auth.user_id}`, cursor, JSON.stringify(response));
+
+            currentPage++;
+            retries = 0;
+        } while (cursor);
+
+        let _cursor = ""
+        let _currentPage = 1
+        do {
+            const cacheCursor = cacheFind(auth.user_id, _currentPage.toString());
+            _cursor = cacheCursor?.data as string || "end";
+            const cacheClips = cacheFind(`clips_${auth.user_id}`, _cursor);
+            if (cacheClips) {
+                console.log(`Adding clips from cache for ${auth.user_id} page ${_currentPage} cursor ${_cursor}`)
+                const resp = JSON.parse(cacheClips.data);
+                clipsFromBatch.push(...resp.data);
+                _cursor = resp?.pagination?.cursor;
             }
 
-            retries = 0;
-            cacheAdd(auth.user_id, currentPage.toString(), cursor);
-        } while (cursor);
+            _currentPage++;
+        } while (_cursor !== "end" && _cursor !== null && _cursor !== undefined);
         
-        cacheWrite(auth.user_id);
-        return [clipsFromBatch, thereIsMore];
+        cacheWriteAll();
+        cacheDump(auth.user_id);
+        return clipsFromBatch;
     } catch (e) {
         if (clipsFromBatch.length) {
-            return [clipsFromBatch, thereIsMore];
+            return clipsFromBatch;
         } else {
             throw e;
         }

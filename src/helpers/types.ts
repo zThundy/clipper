@@ -46,12 +46,20 @@ export type AuthData = {
     user_id: string
 }
 
-export type Cache = { [key: string]: WriteableCache | [] };
+export type Cache = {
+    [key: string]: [
+        {
+            page: string,
+            data: string
+        }
+    ] | []
+};
 
-export type WriteableCache = [
-    page: string | number,
-    cursor: string
-];
+export type CacheMetadata = {
+    [key: string]: {
+        path: string,
+    }
+};
 
 export interface YoutubeDlClipDump {
     'http_headers': YoutubeDlDumpHttpHeaders,

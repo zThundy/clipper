@@ -4,12 +4,12 @@ import Image from "next/image";
 import style from "./page.module.css";
 import modal from "./modal.content.module.css";
 
-import { Button, Checkbox, Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { Info, VideoCameraFront } from "@mui/icons-material";
 
 const clipsDimenstions = {
-  width: 400,
-  height: 240
+  width: 480,
+  height: 272
 };
 
 function Clip({ clip, openModal, _ }) {
@@ -29,36 +29,32 @@ function Clip({ clip, openModal, _ }) {
   }
 
   return (
-    <Grid xs={4} item className={style.clipContainer} data-checked={checked} data-link={clip.url} data-title={clip.title}>
-      <div className={style.clip}>
-        <div className={style.clipImage}>
-          <Checkbox
-            color="primary"
-            className={style.clipCheckbox}
-            checked={checked}
-            data-checked={checked}
-            onClick={_click}
-          />
-
+    <Grid container className={style.clip} justifyContent={"center"} alignContent={"center"} flexDirection={"column"}>
+      <Grid
+        item
+        xs={12}
+        justifyContent={"center"}
+        alignContent={"center"}
+      >
+        <div
+          style={{
+            width: clipsDimenstions.width + "px",
+            height: clipsDimenstions.height + "px"
+          }}
+          className={style.clipImageContainer}
+        >
           <Image
             src={_clip.thumbnail_url.replace("%{width}", clipsDimenstions.width).replace("%{height}", clipsDimenstions.height)}
             alt={_clip.title}
-            className={checked ? style.clipImageChecked : null}
             width={clipsDimenstions.width}
             height={clipsDimenstions.height}
+            className={checked ? style.clipImageChecked : null}
             draggable={false}
             onClick={_click}
-          />
-
-          <div
-            className={modal.clipInfoButton}
-            onClick={() => {
-              // open mui modal with the clip info
-              openModal(_clip);
+            style={{
+              borderRadius: "1rem",
             }}
-          >
-            <Info />
-          </div>
+          />
 
           <div className={style.watchButton}>
             <Button
@@ -76,13 +72,48 @@ function Clip({ clip, openModal, _ }) {
               Watch on Twitch
             </Button>
           </div>
-
-          <div className={style.clipTitle}>
-            <span>Title: {_clip.title}</span>
-            <span className={style.clipCreator}>Creator: {_clip.creator_name}</span>
-          </div>
         </div>
-      </div>
+      </Grid>
+
+      <Grid item xs={12}>
+        <Grid
+          container
+          justifyContent={"center"}
+          alignContent={"center"}
+          style={{
+            marginTop: ".5rem",
+          }}
+        >
+          <Grid
+            item
+            xs={1.5}
+            justifyContent={"center"}
+            alignContent={"center"}
+            textAlign={"center"}
+          >
+            <div
+              className={modal.clipInfoButton}
+              onClick={() => {
+                // open mui modal with the clip info
+                openModal(_clip);
+              }}
+            >
+              <Info fontSize="large" />
+            </div>
+          </Grid>
+          <Grid item xs={10.5}>
+            <div className={style.clipTitle}>
+              <span
+                style={{
+                  lineBreak: "auto",
+                  maxWidth: "24rem",
+                }}
+              >Title: {_clip.title}</span>
+              {/* <span className={style.clipCreator}>Creator: {_clip.creator_name}</span> */}
+            </div>
+          </Grid>
+        </Grid>
+      </Grid>
     </Grid>
   );
 }

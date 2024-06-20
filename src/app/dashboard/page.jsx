@@ -164,140 +164,162 @@ function Dashboard({ }) {
           setClipsDownload(false);
         }} />
 
-        <div className={style.header}>
-          <div style={{
-            display: "flex",
-            flexDirection: "row",
-            margin: "0 0 0 1rem",
-          }}>
-            <Tooltip title="Homepage">
-              <Button
-                className={style.homeButton}
-                color="primary"
-                varuant="contained"
-                onClick={() => {
-                  window.location.href = "/";
-                }}
-              >
-                <Home />
-              </Button>
-            </Tooltip>
-
-            <div className={style.selectAllContainer}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    color="secondary"
-                    checked={selectAll}
-                  />
-                }
-                onChange={() => {
-                  clips.forEach(_ => _.checked = !selectAll);
-                  setClips(clips);
-                  setSelectAll(!selectAll);
-                  setSelectedClips(clips.filter(_ => _.checked));
-                }}
-                label="Select all"
-              />
-            </div>
-
-            <Tooltip title="Filter">
-              <Button
-                className={style.filterButton}
-                color="primary"
-                variant="contained"
-                onClick={() => {
-                  setOpenFilterModal(true);
-                }}
-              >
-                <FilterAlt />
-              </Button>
-            </Tooltip>
-          </div>
-
-          <div
-            style={{
-              margin: "0 1rem 0 0",
-              display: "flex",
-              flexDirection: "row",
-            }}
-          >
-            <Button
-              className={style.downloadButton}
-              startIcon={<Download />}
-              onClick={() => {
-                // check if there are any clips selected
-                if (selectedClips.length === 0) {
-                  setNotifType("warning");
-                  handleOpen("No clips selected");
-                  return;
-                }
-                setClipsDownload(true);
-              }}
-            >
-              Download
-            </Button>
-
-            <Switch
-              color="error"
-              onChange={() => {
-                setDeleteEnabled(!deleteEnabled);
-              }}
-            ></Switch>
-
-            <Button
-              className={style.deleteButton}
-              startIcon={<Delete />}
-              disabled={!deleteEnabled}
-              onClick={() => {
-                setNotifType("warning");
-                handleOpen("Not implemented yet :(");
-              }}
-            >
-              Delete
-            </Button>
-          </div>
-        </div>
-
-        <Grid container className={style.clipsContainer}>
-          {
-            useMemo(() => {
-              if (clips.length === 0) return <Loading />;
-
-              return clips
-                .slice((currentPage - 1) * clipsPerPage, currentPage * clipsPerPage)
-                .map((clip, index) => (
-                  <Clip
-                    key={index}
-                    checked={clip.checked}
-                    clip={clip}
-                    openModal={(__clip) => {
-                      setModalData(__clip);
+        <Grid
+          container
+          justifyContent={"center"}
+          alignContent={"center"}
+        >
+          <Grid item xs={12}>
+            <div className={style.header}>
+              <div style={{
+                display: "flex",
+                flexDirection: "row",
+                margin: "0 0 0 1rem",
+              }}>
+                <Tooltip title="Homepage">
+                  <Button
+                    className={style.homeButton}
+                    color="primary"
+                    varuant="contained"
+                    onClick={() => {
+                      window.location.href = "/";
                     }}
-                    _={() => {
-                      // log all checked clips
-                      // console.log(clips.filter(_ => _.checked));
+                  >
+                    <Home />
+                  </Button>
+                </Tooltip>
+
+                <div className={style.selectAllContainer}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        color="secondary"
+                        checked={selectAll}
+                      />
+                    }
+                    onChange={() => {
+                      clips.forEach(_ => _.checked = !selectAll);
+                      setClips(clips);
+                      setSelectAll(!selectAll);
                       setSelectedClips(clips.filter(_ => _.checked));
                     }}
+                    label="Select all"
                   />
-                ));
-            }, [selectAll, clips, currentPage])
-          }
-        </Grid>
+                </div>
 
-        <div className={style.pageSelector}>
-          <Pagination
-            count={Math.ceil(clips.length / clipsPerPage)}
-            page={currentPage}
-            showFirstButton
-            showLastButton
-            color="primary"
-            size="large"
-            onChange={(_, page) => {
-              setCurrentPage(page);
-            }}
-          />
-        </div>
+                <Tooltip title="Filter">
+                  <Button
+                    className={style.filterButton}
+                    color="primary"
+                    variant="contained"
+                    disableElevation
+                    onClick={() => {
+                      setOpenFilterModal(true);
+                    }}
+                  >
+                    <FilterAlt />
+                  </Button>
+                </Tooltip>
+              </div>
+
+              <div
+                style={{
+                  margin: "0 1rem 0 0",
+                  display: "flex",
+                  flexDirection: "row",
+                }}
+              >
+                <Button
+                  className={style.downloadButton}
+                  startIcon={<Download />}
+                  onClick={() => {
+                    // check if there are any clips selected
+                    if (selectedClips.length === 0) {
+                      setNotifType("warning");
+                      handleOpen("No clips selected");
+                      return;
+                    }
+                    setClipsDownload(true);
+                  }}
+                >
+                  Download
+                </Button>
+
+                <Switch
+                  color="error"
+                  onChange={() => {
+                    setDeleteEnabled(!deleteEnabled);
+                  }}
+                ></Switch>
+
+                <Button
+                  className={style.deleteButton}
+                  startIcon={<Delete />}
+                  disabled={!deleteEnabled}
+                  onClick={() => {
+                    setNotifType("warning");
+                    handleOpen("Not implemented yet :(");
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Grid
+              container
+              style={{
+                marginTop: "8rem"
+              }}
+              justifyContent={"center"}
+              alignContent={"center"}
+            >
+              {
+                useMemo(() => {
+                  if (clips.length === 0) return <Loading />;
+
+                  return clips
+                    .slice((currentPage - 1) * clipsPerPage, currentPage * clipsPerPage)
+                    .map((clip, index) => (
+                      <Grid xs={4} item className={style.clipContainer}>
+                        <Clip
+                          key={index}
+                          checked={clip.checked}
+                          clip={clip}
+                          openModal={(__clip) => {
+                            setModalData(__clip);
+                          }}
+                          _={() => {
+                            // log all checked clips
+                            // console.log(clips.filter(_ => _.checked));
+                            setSelectedClips(clips.filter(_ => _.checked));
+                          }}
+                        />
+                      </Grid>
+                    ));
+                }, [selectAll, clips, currentPage])
+              }
+            </Grid>
+          </Grid>
+
+          <Grid item xs={12}>
+            <div className={style.pageSelector}>
+              <Pagination
+                count={Math.ceil(clips.length / clipsPerPage)}
+                page={currentPage}
+                showFirstButton
+                showLastButton
+                color="primary"
+                size="large"
+                onChange={(_, page) => {
+                  setCurrentPage(page);
+                }}
+              />
+            </div>
+          </Grid>
+        </Grid>
       </LocalizationProvider>
     </>
   );

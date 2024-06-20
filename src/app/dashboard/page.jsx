@@ -114,10 +114,11 @@ function Dashboard({ }) {
   }
 
   useEffect(() => {
+    if (!(process.env.NODE_ENV === "development")) fetchClips();
     localStorage.setItem("loggedIn", "true");
     return () => {
       // REACT... FUCK YOU... GODDAMIT... FUUUUUUUUUUCKKKKKKKKKKK YOOOOOOOUUUUUUUUU
-      fetchClips();
+      if (process.env.NODE_ENV === "development") fetchClips();
     };
   }, []);
 

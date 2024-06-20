@@ -4,8 +4,8 @@ import Image from "next/image";
 import style from "./page.module.css";
 import modal from "./modal.content.module.css";
 
-import { Checkbox, Grid } from "@mui/material";
-import { Info } from "@mui/icons-material";
+import { Button, Checkbox, Grid } from "@mui/material";
+import { Info, VideoCameraFront } from "@mui/icons-material";
 
 const clipsDimenstions = {
   width: 400,
@@ -58,6 +58,23 @@ function Clip({ clip, openModal, _ }) {
             }}
           >
             <Info />
+          </div>
+
+          <div className={style.watchButton}>
+            <Button
+              className={style.button}
+              variant="contained"
+              color="primary"
+              href={_clip.url}
+              target="_blank"
+              rel="noreferrer"
+              startIcon={<VideoCameraFront />}
+              onClick={() => {
+                // open the clip in a new tab
+              }}
+            >
+              Watch on Twitch
+            </Button>
           </div>
 
           <div className={style.clipTitle}>

@@ -52,7 +52,7 @@ export type Cache = {
             page: string,
             data: string
         }
-    ] | []
+    ] | any
 };
 
 export type CacheMetadata = {

@@ -11,7 +11,7 @@ import {
 import fs from 'fs';
 
 let caches: Cache = {};
-let cachesMetadata: CacheMetadata = {}
+let cachesMetadata: CacheMetadata = {};
 
 export function create(id: string, path?: string | null): void {
     if (!cachesMetadata[id]) {
@@ -91,5 +91,5 @@ export function dump(id?: string | undefined | null): void {
 }
 
 export function find(id: string, page: string): Cache[string][0] | undefined {
-    return caches[id].find((item) => item.page === page);
+    return caches[id].find((item: any) => item.page === page);
 }

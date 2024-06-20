@@ -145,6 +145,7 @@ async function getAllClips(auth: AuthData, period: Period, currentPage: number):
     cacheGet(auth.user_id, appPath('cache'));
     cacheGet(`clips_${auth.user_id}`, appPath('cache'));
     let cursor: string | null = null;
+    let fetchedClips: number = 0;
 
     ensureDirectoryExists(appPath('cache'));
 
@@ -185,9 +186,11 @@ async function getAllClips(auth: AuthData, period: Period, currentPage: number):
                 continue;
             }
 
+            fetchedClips += response.data.length;
+
             // save cursor for the next request
             cursor = response?.pagination?.cursor;
-            if (clipsFromBatch.length >= Number(process.env.MAX_CLIP_TOTAL || 100)) {
+            if (fetchedClips >= Number(process.env.MAX_CLIP_TOTAL || 100)) {
                 console.error(`Reached ${process.env.MAX_CLIP_TOTAL || 100} clips, stopping the pagination`);
                 cursor = null;
                 break;

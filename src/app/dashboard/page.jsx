@@ -111,17 +111,15 @@ function Dashboard({ }) {
   }
 
   useEffect(() => {
-    console.log("Dashboard mounted")
     localStorage.setItem("loggedIn", "true");
-
     return () => {
       // REACT... FUCK YOU... GODDAMIT... FUUUUUUUUUUCKKKKKKKKKKK YOOOOOOOUUUUUUUUU
       fetchClips();
-      console.log("Dashboard unmounted")
     };
   }, []);
 
   useEffect(() => {
+    // change this? Maybe? IDK
     if (currentPage % 2 === 0) fetchClips();
   }, [currentPage])
 

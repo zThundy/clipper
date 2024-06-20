@@ -78,7 +78,8 @@ function Clip({ clip, openModal, _ }) {
           </div>
 
           <div className={style.clipTitle}>
-            {_clip.title}
+            <span>Title: {_clip.title}</span>
+            <span className={style.clipCreator}>Creator: {_clip.creator_name}</span>
           </div>
         </div>
       </div>

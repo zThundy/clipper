@@ -13,7 +13,7 @@ export default function ModalContent({ clip, setModalData }) {
   const formatDate = (date) => {
     let _date = new Date(date);
     // format as "dd-mm-yyyy hh:mm:ss"
-    return `${_date.getDate()}-${_date.getMonth() + 1}-${_date.getFullYear()} ${_date.getHours()}:${_date.getMinutes()}:${_date.getSeconds()}`;
+    return `${_date.getDate()}/${_date.getMonth() + 1}/${_date.getFullYear()} ${_date.getHours()}:${_date.getMinutes()}:${_date.getSeconds()}`;
   }
 
   return (

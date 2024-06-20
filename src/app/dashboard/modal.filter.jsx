@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 
-import { Modal, Grid, Divider, Typography } from '@mui/material';
+import { Modal, Grid, Divider, Typography, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import moment from 'moment';
@@ -27,9 +27,6 @@ function ModalFilter({ open, onClose }) {
     // check with moment if the date is valid
     if (moment(_endDate).isValid()) setEndDate(moment(_endDate));
     else setEndDate(null);
-
-    console.log("ModalFilter mounted");
-    return () => console.log("ModalFilter unmounted");
   }, [])
 
   return (
@@ -61,7 +58,11 @@ function ModalFilter({ open, onClose }) {
           </div>
         </Grid>
         <Grid item xs={6} className={style.datePickerContainer}>
-          <Typography>
+          <Typography
+            style={{
+              fontSize: "2.5rem",
+            }}
+          >
             Start Date
           </Typography>
           <DatePicker
@@ -78,7 +79,11 @@ function ModalFilter({ open, onClose }) {
           />
         </Grid>
         <Grid item xs={6} className={style.datePickerContainer}>
-          <Typography>
+          <Typography
+            style={{
+              fontSize: "2.5rem",
+            }}
+          >
             End Date
           </Typography>
           <DatePicker
@@ -92,6 +97,30 @@ function ModalFilter({ open, onClose }) {
               localStorage.setItem("endDate", value);
             }}
             renderInput={(params) => <input {...params} />}
+          />
+        </Grid>
+        <Grid item xs={12} sx={{
+          margin: "3rem 0"
+        }}>
+          <Divider
+            style={{
+              backgroundColor: "var(--mui-palette-background-paper)"
+            }}
+          />
+        </Grid>
+        <Grid item xs={12} className={style.datePickerContainer}>
+          <Typography
+            style={{
+              fontSize: "2.5rem",
+            }}
+          >
+            Title
+          </Typography>
+          <TextField
+            variant="outlined"
+            fullWidth
+            color="primary"
+            className={style.textField}
           />
         </Grid>
       </Grid>

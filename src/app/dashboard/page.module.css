@@ -119,8 +119,8 @@
   background-color: var(--mui-palette-background-light);
   border-radius: .2rem;
   padding: 0;
-  width: calc(100% - 90.3rem);
-  margin: 10.5rem 0 0 .5rem;
+  width: 23rem;
+  margin: 10.8rem 0 0 1rem;
   cursor: pointer;
   position: absolute;
   transition: opacity 0.1s ease-in-out;
@@ -137,6 +137,9 @@
 }
 
 .clipTitle {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
   padding: 1rem;
   position: relative;
   align-self: flex-start;

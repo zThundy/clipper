@@ -68,6 +68,104 @@ const theme = extendTheme({
           // }
         }),
       }
+    },
+    MuiDateCalendar: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.vars.palette.text.main,
+          borderRadius: '2px',
+          borderWidth: '1px',
+          borderColor: theme.vars.palette.text.main,
+          border: '1px solid',
+          fontWeight: 'bold',
+          backgroundColor: theme.vars.palette.background.main,
+
+          weekDaysLabel: {
+            color: theme.vars.palette.text.main,
+          },
+        }),
+      }
+    },
+    MuiDayCalendar: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.vars.palette.text.main,
+          "&.Mui-selected": {
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.text.main,
+          },
+          "&.Mui-disabled": {
+            color: theme.vars.palette.text.darkgray,
+          },
+        }),
+        weekDayLabel: ({ theme }) => ({
+          color: theme.vars.palette.secondary.main,
+          fontWeight: 'bold',
+        }),
+      }
+    },
+    MuiPickersDay: {
+      styleOverrides: {
+        today: ({ theme }) => ({
+          color: theme.vars.palette.primary.light,
+          borderRadius: '50%',
+          border: '2px solid ' + theme.vars.palette.primary.main,
+          backgroundColor: theme.vars.palette.background.light,
+          "&:hover": {
+            backgroundColor: theme.vars.palette.background.light,
+          },
+        }),
+        root: ({ theme }) => ({
+          color: theme.vars.palette.text.main,
+          transition: "border-radius .2s, color .2s",
+          "&:hover": {
+            backgroundColor: theme.vars.palette.background.light,
+            borderRadius: '50%',
+            border: '2px solid ' + theme.vars.palette.primary.main,
+          },
+        }),
+      }
+    },
+    MuiPickersCalendarHeader: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.vars.palette.text.main,
+          backgroundColor: theme.vars.palette.background.main,
+          "& button": {
+            color: theme.vars.palette.text.main,
+          }
+        }),
+      }
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.vars.palette.text.main,
+          borderColor: theme.vars.palette.text.main,
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderRadius: '2px',
+          backgroundColor: theme.vars.palette.background.main,
+          "&.Mui-focused": {
+            border: "none"
+          },
+        }),
+        input: ({ theme }) => ({
+          color: theme.vars.palette.text.main,
+          input: {
+            color: theme.vars.palette.text.main,
+          }
+        }),
+        adornedEnd: ({ theme }) => ({
+          color: theme.vars.palette.text.main,
+          button: {
+            color: theme.vars.palette.text.main,
+          }
+        }),
+        inputHiddenLabel: ({ theme }) => ({
+          color: theme.vars.palette.text.main,
+        }),
+      }
     }
   }
 });

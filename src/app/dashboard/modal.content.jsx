@@ -5,8 +5,8 @@ import modal from "./modal.content.module.css";
 import { BookSharp, CalendarToday, Person, Timeline, VideoCameraFront, ViewStream } from "@mui/icons-material";
 
 const clipSizes = {
-  width: 320,
-  height: 180
+  width: 480,
+  height: 272
 }
 
 export default function ModalContent({ clip, setModalData }) {

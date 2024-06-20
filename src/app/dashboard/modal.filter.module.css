@@ -11,10 +11,31 @@
 .modalContent {
   background-color: var(--mui-palette-background-main);
   margin: auto;
-  padding: 20px;
+  padding: 0 2rem 1rem 2rem;
   border: 1px solid #888;
   width: 80%;
   border-radius: 5px;
   box-shadow: 0 0 0 0 var(--mui-palette-background-dark);
   transform: translateY(-.4rem);
+}
+
+.warningContainer {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  margin: 1rem auto;
+  padding: 0 1rem;
+  gap: 1rem;
+  border-radius: .5rem;
+  background-color: var(--mui-palette-warning-main);
+  user-select: none;
+}
+
+.datePickerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: var(--mui-palette-text-main);
+  gap: 1rem;
 }

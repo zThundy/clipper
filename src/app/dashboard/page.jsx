@@ -66,7 +66,7 @@ function Loading({ }) {
 }
 
 function Dashboard({ }) {
-  const [selectAll, setSelectAll] = useState(false);
+  const [selectAll, setSelectAll] = useState({});
   const [clips, setClips] = useState([]);
   const [modalData, setModalData] = useState(null);
 
@@ -94,13 +94,15 @@ function Dashboard({ }) {
 
         // add the result to the clips array
         setClips((prev) => {
-          setSelectAll(prev => {
-            if (prev) clips.forEach(_ => _.checked = true);
-            else clips.forEach(_ => _.checked = false);
-            return prev;
-          });
+          console.log("selectAll in fetchClips", selectAll, currentPage);
 
           setSelectedClips(clips.filter(_ => _.checked));
+          // if (selectAll[currentPage]) selectAllInCurrentPage();
+          // replace the checked value of "clips" to the one in prev
+          clips.forEach(clip => {
+            const _clip = prev.find(_ => _.id === clip.id);
+            if (_clip) clip.checked = _clip.checked;
+          });
           return clips;
         });
       })
@@ -123,6 +125,12 @@ function Dashboard({ }) {
   }, []);
 
   useEffect(() => {
+    console.log("changing clips all")
+
+    console.log(clips)
+  }, [clips])
+
+  useEffect(() => {
     // change this? Maybe? IDK
     if (currentPage % 2 === 0) fetchClips();
   }, [currentPage])
@@ -136,6 +144,25 @@ function Dashboard({ }) {
     setOpen(true);
     setNotifMessage(message);
   };
+
+  const selectAllInCurrentPage = (_page) => {
+    if (!_page) _page = currentPage;
+    const startIndex = ((_page - 1) * clipsPerPage)
+    const endIndex = startIndex + clipsPerPage;
+
+    console.log("info in selectAllInCurrentPage", _page, selectAll)
+
+    // set checked to the clips in this range
+    // copy selectAll to the new object
+    let _selectAll = { ...selectAll };
+    if (_selectAll[_page]) _selectAll[_page] = !_selectAll[_page]
+    else _selectAll[_page] = true;
+    setSelectAll(_selectAll);
+
+    let _clips = [...clips];
+    _clips.slice(startIndex, endIndex).forEach(clip => clip.checked = _selectAll[currentPage]);
+    setClips(_clips);
+  }
 
   return (
     <>
@@ -194,13 +221,17 @@ function Dashboard({ }) {
                     control={
                       <Checkbox
                         color="secondary"
-                        checked={selectAll}
+                        checked={selectAll[currentPage] || false}
                       />
                     }
                     onChange={() => {
-                      clips.forEach(_ => _.checked = !selectAll);
-                      setClips(clips);
-                      setSelectAll(!selectAll);
+                      selectAllInCurrentPage();
+                      // clips.forEach(_ => _.checked = !selectAll);
+                      setSelectAll((prev) => {
+                        if (!prev[currentPage]) prev[currentPage] = true;
+                        else prev[currentPage] = !prev[currentPage];
+                        return prev;
+                      })
                       setSelectedClips(clips.filter(_ => _.checked));
                     }}
                     label="Select all"
@@ -283,9 +314,8 @@ function Dashboard({ }) {
                   return clips
                     .slice((currentPage - 1) * clipsPerPage, currentPage * clipsPerPage)
                     .map((clip, index) => (
-                      <Grid xs={4} item className={style.clipContainer}>
+                      <Grid xs={4} item className={style.clipContainer} key={index}>
                         <Clip
-                          key={index}
                           checked={clip.checked}
                           clip={clip}
                           openModal={(__clip) => {

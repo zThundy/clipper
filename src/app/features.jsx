@@ -34,8 +34,8 @@ function Features({ }) {
       }}
     >
       <Stack
-        direction={{ sm: 'column', md: 'row' }}
-        spacing={{ xs: 1, sm: 2, md: 4 }}
+        direction={{ sm: 'column', md: 'column', lg: 'row' }}
+        spacing={{ xs: 1, sm: 3, md: 5 }}
       >
         <Item>
           <Login fontSize="large" />

@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { Container, Grid } from "@mui/material";
 import style from "./page.module.css";
 
 import Features from "./features";
@@ -6,11 +6,13 @@ import { Warning } from "@mui/icons-material";
 
 export default function Home({ }) {
   return (
-    <>
-      <section
+    <Grid container>
+      <Grid
+        item
+        xs={12}
         style={{
           width: "100%",
-          height: "50vh",
+          height: "fit-content",
           display: "flex",
           justifyContent: "center",
         }}
@@ -20,27 +22,32 @@ export default function Home({ }) {
           <div className={style.textWhite}>The <span className={style.textHighlight}>easyest</span> way to manage your</div>
           <h1 className={style.textTwitch}>Twitch Clips</h1>
         </Container>
-      </section>
+      </Grid>
 
-      <section
+      <Grid
+        item
+        xs={12}
         style={{
           width: "100%",
           display: "flex",
-          height: "100vh",
+          height: "fit-content",
           justifyContent: "center",
         }}
         id="features"
       >
         <Features />
-      </section>
+      </Grid>
 
-      <section
+      <Grid
+        item
+        xs={11}
         style={{
-          width: "100%",
-          height: "100vh",
+          // width: "calc(100vw - 5rem)",
+          height: "calc(100vh + 10rem)",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          margin: "auto",
           flexDirection: "column",
         }}
         id="about"
@@ -73,7 +80,7 @@ export default function Home({ }) {
             backgroundColor: "var(--mui-palette-warning-main)",
             border: ".3rem solid var(--mui-palette-warning-light)",
             padding: ".4rem",
-            margin: "2rem 0",
+            margin: "1rem 0",
             borderRadius: "1rem",
           }}
         >
@@ -102,6 +109,7 @@ export default function Home({ }) {
             backgroundColor: "var(--mui-palette-warning-main)",
             border: ".3rem solid var(--mui-palette-warning-light)",
             padding: ".4rem",
+            margin: "1rem 0",
             borderRadius: "1rem",
           }}
         >
@@ -118,7 +126,7 @@ export default function Home({ }) {
             This website is optimized for desktop 1920x1080 resolution.
           </div>
         </Container>
-      </section>
-    </>
+      </Grid>
+    </Grid>
   );
 }

@@ -266,7 +266,7 @@ async function clips(auth: AuthData, req: ClipRequest): Promise<ClipData> {
     }
 
     console.log("Parameters: ", parameters.toString());
-    const url = `${process.env.BASE_URL as string}?${parameters.toString()}`;
+    const url = `${process.env.BASE_URL as string}/clips?${parameters.toString()}`;
     const response = await fetch(url, { headers });
 
     if (!response.ok) {

@@ -9,7 +9,7 @@ import styled from '@emotion/styled';
 import { Dashboard, Login } from '@mui/icons-material';
 
 const StyledHeaderContainer = styled(Grid)(({ theme }) => ({
-  [theme.breakpoints.up('sm')]: {
+  [theme.breakpoints.up('xs')]: {
     position: "fixed",
     margin: "auto",
     width: "80%",
@@ -31,13 +31,20 @@ const StyledHeaderContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const StyledTitle = styled("div")(({ theme }) => ({
-  [theme.breakpoints.up('sm')]: {
-    display: "flex",
-    alignItems: "center",
-    width: "15%",
-    height: "100%",
-    cursor: "pointer",
-    "& span": {
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  width: "fit-content",
+  height: "100%",
+  cursor: "pointer",
+  [theme.breakpoints.up('xs')]: {
+    "& .spanTitle": {
+      display: "none"
+    }
+  },
+  [theme.breakpoints.up('md')]: {
+    "& .spanTitle": {
+      display: "flex",
       fontSize: "1.6rem",
       fontWeight: "bold",
       margin: "0 0 0 1rem"
@@ -46,12 +53,20 @@ const StyledTitle = styled("div")(({ theme }) => ({
 }));
 
 const StyledNav = styled("nav")(({ theme }) => ({
-  [theme.breakpoints.up('sm')]: {
+  [theme.breakpoints.up("xs")]: {
+    display: "none",
+    "& a": {
+      display: "none",
+    }
+  },
+  [theme.breakpoints.up("sm")]: {
     display: "flex",
     alignItems: "center",
-    width: "60%",
+    flexDirection: "row",
+    width: "fit-content",
     height: "100%",
     "& a": {
+      display: "flex",
       color: theme.vars.palette.text.dark,
       textDecoration: "none",
       margin: "0 1.5rem 0 1.5rem",
@@ -62,9 +77,6 @@ const StyledNav = styled("nav")(({ theme }) => ({
         color: theme.vars.palette.text.light
       }
     }
-  },
-  [theme.breakpoints.down('sm')]: {
-    display: "none"
   },
 }));
 
@@ -83,7 +95,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
       color: theme.vars.palette.text.darkgray,
     }
   },
-  [theme.breakpoints.up('sm')]: {
+  [theme.breakpoints.up('xs')]: {
     color: theme.vars.palette.text.gray,
     animation: "gradient 8s infinite ease",
     padding: "1rem 2rem 1rem 2rem",
@@ -105,7 +117,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 }));
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
-  [theme.breakpoints.up('sm')]: {
+  [theme.breakpoints.up('xs')]: {
     "& .MuiBadge-dot": {
       backgroundColor: theme.vars.palette.warning.light,
       boxShadow: "0 0 0 2px " + theme.vars.palette.background.light,
@@ -144,7 +156,13 @@ function Header({ }) {
       })()}
     >
       <StyledHeaderContainer container style={{ justifyContent: "space-between" }}>
-        <Grid item xs={3} sm={3} md={3} lg={3} xl={3} style={{ display: "flex", justifyContent: "left" }}>
+        <Grid item xs={4} sm={5} md={6} lg={6} xl={6}
+          style={{
+            display: "flex",
+            justifyContent: "left",
+            alignItems: "center"
+          }}
+        >
           <StyledTitle
             onClick={() => {
               if (path === "/") return window.scrollTo(0, 0);
@@ -172,17 +190,14 @@ function Header({ }) {
                 <Image src="/images/clipmaner.png" width={45} height={45} alt="logo" />
               </Avatar>
             </StyledBadge>
-            <span>Clipmaner</span>
+            <span className='spanTitle'>Clipmaner</span>
           </StyledTitle>
-        </Grid>
-        <Grid item xs={5} sm={5} md={5} lg={5} xl={5} style={{ display: "flex", justifyContent: "left" }}>
           <StyledNav>
             <a href="#features">Features</a>
             <a href="#about">About</a>
-            {/* {path === "/" ? <a href="#contact">Premium ✦</a> : null} */}
           </StyledNav>
         </Grid>
-        <Grid item xs={4} sm={4} md={4} lg={4} xl={4} style={{ display: "flex", justifyContent: "right" }}>
+        <Grid item xs={8} sm={6} md={5} lg={5} xl={4} style={{ display: "flex", justifyContent: "right" }}>
           <StyledButton
             variant="contained"
             color='primary'

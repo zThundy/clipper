@@ -121,7 +121,7 @@ function Cookies({ }) {
                   sm: 'column',
                 }}
                 sx={{
-                  width: '10rem',
+                  width: "fit-content",
                   flexShrink: 0,
                   alignSelf: { xs: 'flex-end', sm: 'center' },
                 }}

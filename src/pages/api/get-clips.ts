@@ -19,7 +19,8 @@ import {
 import {
     verbose,
     error,
-    warn
+    warn,
+    log
 } from "@/helpers/logger";
 
 import {
@@ -45,7 +46,7 @@ export default async function handler(
         // get the page number from the url query
         const { access_token, refresh_token, user_data } = parseCookies(req);
         // get date from the url query
-        let { left, right, cursor, currentPage } = req.query;
+        let { filters: f, currentPage } = req.query;
         if (!access_token || !refresh_token || !user_data) {
             error(`Access token, refresh token or user data not found in cookies from ${ip}`);
             res.status(401).json({
@@ -70,18 +71,22 @@ export default async function handler(
         // get created_at from user_data
         const { created_at, id } = JSON.parse(decodeURIComponent(user_data)) as Dict<string>;
 
+        const filters = JSON.parse(decodeURIComponent(f as string)) as Dict<string>;
+        const { startDate: left, endDate: right } = filters;
+
         // create base period
         let period: Period = { left: new Date(), right: new Date() };
         if (left) period.left = new Date(left as string)
         else period.left = new Date(created_at);
         if (right) period.right = new Date(right as string);
-        if (!cursor) cursor = "";
 
         try {
             verbose(`Getting clips for ${id}, ip: ${ip}...`)
             const data = await getAllClips({ access_token, refresh_token, user_id: id }, period, Number(currentPage));
             verbose(`Got ${data.length} clips for ${id}, ip: ${ip}...`)
-            res.status(200).json(data as any);
+            const sorted = sortClips(data, filters);
+            verbose(`Sending ${sorted.length} clips for ${id}, ip: ${ip}...`)
+            res.status(200).json(sorted as any);
         } catch (error: any) {
             error(`Failed to get clips for ${id}, ip: ${ip}`, error);
             if (error.message === 'Access token expired') {
@@ -95,7 +100,10 @@ export default async function handler(
                 verbose(`Access token refresh for ${id} successful, retrying the request...`);
                 // Retry the request to get the clips
                 const data = await getAllClips({ access_token, refresh_token, user_id: id }, period, Number(currentPage));
-                res.status(200).json(data as any);
+                verbose(`Got ${data.length} clips for ${id}, ip: ${ip}...`)
+                const sorted = sortClips(data, filters);
+                verbose(`Sending ${sorted.length} clips for ${id}, ip: ${ip}...`)
+                res.status(200).json(sorted as any);
             } else {
                 // clear the cookies
                 res.setHeader('Set-Cookie', `access_token=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT`);
@@ -120,6 +128,42 @@ export default async function handler(
             message: "Method Not Allowed"
         } as any);
     }
+}
+
+function sortClips(data: ClipDataResponse[], filters: Dict<string>): ClipDataResponse[] {
+    const { author, startDate, endDate, title } = filters;
+
+    // log(`Filtering clips by author: ${author}, startDate: ${startDate}, endDate: ${endDate}, title: ${title}`)
+    // log(data)
+
+    if (author && author.length > 0) {
+        verbose(`Filtering clips by author: ${author}`);
+        data = data.filter(clip => clip.creator_name === author);
+        verbose(`Filtered clips by author: ${author}, ${data.length} clips left`);
+    }
+
+    if (startDate) {
+        verbose(`Filtering clips by startDate: ${startDate}`);
+        data = data.filter(clip => new Date(clip.created_at) >= new Date(startDate));
+        verbose(`Filtered clips by startDate: ${startDate}, ${data.length} clips left`);
+    }
+
+    if (endDate) {
+        verbose(`Filtering clips by endDate: ${endDate}`);
+        data = data.filter(clip => new Date(clip.created_at) <= new Date(endDate));
+        verbose(`Filtered clips by endDate: ${endDate}, ${data.length} clips left`);
+    }
+
+    if (title && title.length > 0) {
+        verbose(`Filtering clips by title: ${title}`);
+        data = data.filter(clip => clip.title.toLocaleLowerCase().includes(title.toLocaleLowerCase()));
+        verbose(`Filtered clips by title: ${title}, ${data.length} clips left`);
+    }
+
+    // log(`Filtered clips:`)
+    // log(data)
+
+    return data;
 }
 
 function sleep(delay: number): Promise<void> {
@@ -223,7 +267,7 @@ async function getAllClips(auth: AuthData, period: Period, currentPage: number):
 
             _currentPage++;
         } while (_cursor !== "end" && _cursor !== null && _cursor !== undefined);
-        
+
         cacheWriteAll();
         // cacheDump(auth.user_id);
         return clipsFromBatch;

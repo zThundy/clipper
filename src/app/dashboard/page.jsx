@@ -81,9 +81,9 @@ function Dashboard({ }) {
   const [clipsDownload, setClipsDownload] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
 
-  const fetchClips = () => {
+  const fetchClips = (localFilters) => {
     // get the clips on page load using the api call /api/get-clips
-    fetch(`/api/get-clips?currentPage=${currentPage}`)
+    fetch(`/api/get-clips?currentPage=${currentPage}&filters=${localFilters ? JSON.stringify(localFilters) : "{}"}`)
       .then(async res => {
         if (!res.ok) throw await res.json();
         return res.json();
@@ -109,7 +109,6 @@ function Dashboard({ }) {
         if (err.redirect) window.location.href = err.redirectPath;
         setClips([]);
       });
-
   }
 
   useEffect(() => {
@@ -124,8 +123,12 @@ function Dashboard({ }) {
   useEffect(() => {
     // change this? Maybe? IDK
     if (currentPage % 2 === 0) fetchClips();
-    console.log(selectAll);
   }, [currentPage])
+
+  useEffect(() => {
+    const filters = localStorage.getItem("filters");
+    if (!openFilterModal) fetchClips(JSON.parse(filters));
+  }, [openFilterModal]);
 
   const handleClose = (e, reason) => {
     if (reason === 'clickaway') return;
@@ -141,15 +144,9 @@ function Dashboard({ }) {
     if (!_page) _page = currentPage;
     const startIndex = ((_page - 1) * clipsPerPage)
     const endIndex = startIndex + clipsPerPage;
-
     // set checked to the clips in this range
     // copy selectAll to the new object
     let _selectAll = [...selectAll];
-
-    console.log("selectAll in selectAllInCurrentPage", _selectAll)
-    console.log("currentpage in selectAllInCurrentPage", currentPage)
-    console.log("_page in selectAllInCurrentPage", _page)
-
     // find if _selectAll contains currentPage, if so, change selected from true to false
     const currentPageExists = _selectAll.some(item => item.page === _page);
     if (currentPageExists) {
@@ -162,11 +159,9 @@ function Dashboard({ }) {
     } else {
       _selectAll.push({ page: _page, selected: true });
     }
-
-    console.log("Setted selectAll in selectAllInCurrentPage", _selectAll)
     // set the new selectAll
     setSelectAll((prev) => { return _selectAll; });
-
+    // update clips
     let _clips = [...clips];
     _clips.slice(startIndex, endIndex).forEach(clip => clip.checked = _selectAll.find(_ => _.page === _page).selected);
     setClips(_clips);

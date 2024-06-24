@@ -125,12 +125,6 @@ function Dashboard({ }) {
   }, []);
 
   useEffect(() => {
-    console.log("changing clips all")
-
-    console.log(clips)
-  }, [clips])
-
-  useEffect(() => {
     // change this? Maybe? IDK
     if (currentPage % 2 === 0) fetchClips();
   }, [currentPage])

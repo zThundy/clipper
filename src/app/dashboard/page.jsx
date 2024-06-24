@@ -66,7 +66,7 @@ function Loading({ }) {
 }
 
 function Dashboard({ }) {
-  const [selectAll, setSelectAll] = useState({});
+  const [selectAll, setSelectAll] = useState([]);
   const [clips, setClips] = useState([]);
   const [modalData, setModalData] = useState(null);
 
@@ -75,7 +75,7 @@ function Dashboard({ }) {
   const [notifType, setNotifType] = useState("info");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [deleteEnabled, setDeleteEnabled] = useState(false);
+  // const [deleteEnabled, setDeleteEnabled] = useState(false);
   const [selectedClips, setSelectedClips] = useState([]);
 
   const [clipsDownload, setClipsDownload] = useState(false);
@@ -94,10 +94,7 @@ function Dashboard({ }) {
 
         // add the result to the clips array
         setClips((prev) => {
-          console.log("selectAll in fetchClips", selectAll, currentPage);
-
           setSelectedClips(clips.filter(_ => _.checked));
-          // if (selectAll[currentPage]) selectAllInCurrentPage();
           // replace the checked value of "clips" to the one in prev
           clips.forEach(clip => {
             const _clip = prev.find(_ => _.id === clip.id);
@@ -127,6 +124,7 @@ function Dashboard({ }) {
   useEffect(() => {
     // change this? Maybe? IDK
     if (currentPage % 2 === 0) fetchClips();
+    console.log(selectAll);
   }, [currentPage])
 
   const handleClose = (e, reason) => {
@@ -144,17 +142,33 @@ function Dashboard({ }) {
     const startIndex = ((_page - 1) * clipsPerPage)
     const endIndex = startIndex + clipsPerPage;
 
-    console.log("info in selectAllInCurrentPage", _page, selectAll)
-
     // set checked to the clips in this range
     // copy selectAll to the new object
-    let _selectAll = { ...selectAll };
-    if (_selectAll[_page]) _selectAll[_page] = !_selectAll[_page]
-    else _selectAll[_page] = true;
-    setSelectAll(_selectAll);
+    let _selectAll = [...selectAll];
+
+    console.log("selectAll in selectAllInCurrentPage", _selectAll)
+    console.log("currentpage in selectAllInCurrentPage", currentPage)
+    console.log("_page in selectAllInCurrentPage", _page)
+
+    // find if _selectAll contains currentPage, if so, change selected from true to false
+    const currentPageExists = _selectAll.some(item => item.page === _page);
+    if (currentPageExists) {
+      _selectAll = _selectAll.map(item => {
+        if (item.page === _page) {
+          return { ...item, selected: !item.selected };
+        }
+        return item;
+      });
+    } else {
+      _selectAll.push({ page: _page, selected: true });
+    }
+
+    console.log("Setted selectAll in selectAllInCurrentPage", _selectAll)
+    // set the new selectAll
+    setSelectAll((prev) => { return _selectAll; });
 
     let _clips = [...clips];
-    _clips.slice(startIndex, endIndex).forEach(clip => clip.checked = _selectAll[currentPage]);
+    _clips.slice(startIndex, endIndex).forEach(clip => clip.checked = _selectAll.find(_ => _.page === _page).selected);
     setClips(_clips);
   }
 
@@ -215,17 +229,11 @@ function Dashboard({ }) {
                     control={
                       <Checkbox
                         color="secondary"
-                        checked={selectAll[currentPage] || false}
+                        checked={selectAll.find(_ => _.page === currentPage)?.selected || false}
                       />
                     }
                     onChange={() => {
                       selectAllInCurrentPage();
-                      // clips.forEach(_ => _.checked = !selectAll);
-                      setSelectAll((prev) => {
-                        if (!prev[currentPage]) prev[currentPage] = true;
-                        else prev[currentPage] = !prev[currentPage];
-                        return prev;
-                      })
                       setSelectedClips(clips.filter(_ => _.checked));
                     }}
                     label="Select all"
@@ -270,7 +278,7 @@ function Dashboard({ }) {
                   Download
                 </Button>
 
-                <Switch
+                {/* <Switch
                   color="error"
                   onChange={() => {
                     setDeleteEnabled(!deleteEnabled);
@@ -287,7 +295,7 @@ function Dashboard({ }) {
                   }}
                 >
                   Delete
-                </Button>
+                </Button> */}
               </div>
             </div>
           </Grid>

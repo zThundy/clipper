@@ -14,6 +14,7 @@ export type ClipDataResponse = {
     game_id: string,
     language: string,
     title: string,
+    duration: number,
     view_count: number,
     created_at: string,
     thumbnail_url: string

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 
-import { Modal, Grid, Divider, Typography, TextField, Button, FormControl, Select, MenuItem } from '@mui/material';
+import { Modal, Grid, Divider, Typography, TextField, Button, FormControl, Select, MenuItem, Switch } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import moment from 'moment';
@@ -19,6 +19,7 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
   const [author, setAuthor] = useState('');
   const [authorList, setAuthorList] = useState([]);
   const [type, setType] = useState("clips");
+  const [sortBy, setSortBy] = useState("date");
 
   useEffect(() => {
     const _startDate = localStorage.getItem("startDate");
@@ -51,6 +52,10 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
     setType(event.target.value);
   }
 
+  const handleSortByChange = (event) => {
+    setSortBy(event.target.value);
+  }
+
   const applyFilters = () => {
     if (errored) return;
 
@@ -59,7 +64,8 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
       endDate: endDate,
       title: title,
       author: author,
-      type: type
+      type: type,
+      sortBy: sortBy,
     }
 
     localStorage.setItem("filters", JSON.stringify(filters));
@@ -70,6 +76,7 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
     setEndDate(null);
     setTitle("");
     setAuthor("");
+    setSortBy("date");
     setType("clips");
     localStorage.removeItem("filters");
     localStorage.removeItem("startDate");
@@ -87,7 +94,11 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
     if (type !== "clips" && type !== "video") {
       setType("clips");
     }
-  }, [startDate, endDate, title, author, type])
+
+    if (sortBy !== "date" && sortBy !== "views" && sortBy !== "title" && sortBy !== "duration") {
+      setSortBy("date");
+    }
+  }, [startDate, endDate, title, author, type, sortBy])
 
   return (
     <Modal open={open} onClose={onClose} className={style.modal}>
@@ -202,7 +213,7 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
             justifyContent="space-between"
             alignContent="center"
           >
-            <Grid item xs={5.8} className={style.datePickerContainer}>
+            <Grid item xs={4} className={style.datePickerContainer}>
               <Typography
                 style={{
                   fontSize: "2.5rem",
@@ -211,6 +222,9 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
                 Title
               </Typography>
               <TextField
+                sx={{
+                  width: "60%"
+                }}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 variant="outlined"
@@ -219,7 +233,7 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
                 className={style.textField}
               />
             </Grid>
-            <Grid item xs={5.8} className={style.datePickerContainer}>
+            <Grid item xs={4} className={style.datePickerContainer}>
               <Typography
                 style={{
                   fontSize: "2.5rem",
@@ -227,7 +241,11 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
               >
                 Author
               </Typography>
-              <FormControl fullWidth>
+              <FormControl
+                sx={{
+                  width: "60%"
+                }}
+              >
                 <Select
                   value={author}
                   onChange={handleChange}
@@ -237,6 +255,33 @@ function ModalFilter({ open, onClose, filterApplied, clips }) {
                       <MenuItem key={index} value={author}>{author}</MenuItem>
                     ))
                   }
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4} className={style.datePickerContainer} sx={{
+              display: "flex",
+              flexDirection: "row",
+            }}>
+              <Typography
+                style={{
+                  fontSize: "2.5rem",
+                }}
+              >
+                Sort by
+              </Typography>
+              <FormControl
+                sx={{
+                  width: "60%"
+                }}
+              >
+                <Select
+                  value={sortBy}
+                  onChange={handleSortByChange}
+                >
+                  <MenuItem value="date">Date</MenuItem>
+                  <MenuItem value="views">Views</MenuItem>
+                  <MenuItem value="title">Title</MenuItem>
+                  <MenuItem value="duration">Duration</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

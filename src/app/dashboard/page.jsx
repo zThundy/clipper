@@ -73,6 +73,7 @@ function Dashboard({ }) {
   const [open, setOpen] = useState(false);
   const [notifMessage, setNotifMessage] = useState("");
   const [notifType, setNotifType] = useState("info");
+  const [selectedFilters, setSelectedFilters] = useState({});
 
   const [currentPage, setCurrentPage] = useState(1);
   // const [deleteEnabled, setDeleteEnabled] = useState(false);
@@ -83,7 +84,7 @@ function Dashboard({ }) {
 
   const fetchClips = (localFilters) => {
     // get the clips on page load using the api call /api/get-clips
-    fetch(`/api/get-clips?currentPage=${currentPage}&filters=${localFilters ? JSON.stringify(localFilters) : "{}"}`)
+    fetch(`/api/get-clips?currentPage=${currentPage}&filters=${localFilters ? JSON.stringify(localFilters) : JSON.stringify(selectedFilters)}`)
       .then(async res => {
         if (!res.ok) throw await res.json();
         return res.json();
@@ -127,7 +128,12 @@ function Dashboard({ }) {
 
   useEffect(() => {
     const filters = localStorage.getItem("filters");
-    if (!openFilterModal) fetchClips(JSON.parse(filters));
+    console.log(filters);
+    setSelectedFilters(() => {
+      if (!filters) return false;
+      if (!openFilterModal) fetchClips(JSON.parse(filters));
+      return JSON.parse(filters);
+    });
   }, [openFilterModal]);
 
   const handleClose = (e, reason) => {

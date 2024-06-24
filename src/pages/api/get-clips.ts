@@ -131,7 +131,7 @@ export default async function handler(
 }
 
 function sortClips(data: ClipDataResponse[], filters: Dict<string>): ClipDataResponse[] {
-    const { author, startDate, endDate, title } = filters;
+    const { author, startDate, endDate, title, sortBy } = filters;
 
     // log(`Filtering clips by author: ${author}, startDate: ${startDate}, endDate: ${endDate}, title: ${title}`)
     // log(data)
@@ -158,6 +158,32 @@ function sortClips(data: ClipDataResponse[], filters: Dict<string>): ClipDataRes
         verbose(`Filtering clips by title: ${title}`);
         data = data.filter(clip => clip.title.toLocaleLowerCase().includes(title.toLocaleLowerCase()));
         verbose(`Filtered clips by title: ${title}, ${data.length} clips left`);
+    }
+
+    switch (sortBy) {
+        case "duration":
+            verbose(`Sorting clips by duration`);
+            data = data.sort((a, b) => a.duration - b.duration);
+            verbose(`Sorted clips by duration`);
+            break;
+        case "views":
+            verbose(`Sorting clips by views`);
+            data = data.sort((a, b) => a.view_count - b.view_count);
+            verbose(`Sorted clips by views`);
+            break;
+        case "title":
+            verbose(`Sorting clips by title`);
+            data = data.sort((a, b) => a.title.localeCompare(b.title));
+            verbose(`Sorted clips by title`);
+            break;
+        case "date":
+            verbose(`Sorting clips by date`);
+            data = data.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+            verbose(`Sorted clips by date`);
+            break;
+        default:
+            verbose(`No sorting applied`);
+            break;
     }
 
     // log(`Filtered clips:`)

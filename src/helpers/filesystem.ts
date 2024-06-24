@@ -6,6 +6,8 @@ export const access = promisify(fs.access);
 export const write = promisify(fs.writeFile);
 export const readFile = promisify(fs.readFile);
 export const writeFile = promisify(fs.writeFile);
+export const append = promisify(fs.appendFile);
+export const deleteFile = promisify(fs.unlink);
 
 export function existsSync(filePath: string): boolean {
     try {

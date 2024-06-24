@@ -1,12 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-import { ClipDataResponse } from '../../helpers/types'
-import { ClipDownloader } from '../../helpers/clipDownload'
+import { ClipDataResponse } from '@/helpers/types'
+import { ClipDownloader } from '@/helpers/clipDownload'
 
 import fs from 'fs'
 import archiver from 'archiver'
-import { appPath, sleep } from '@/helpers/utils'
+import { appPath, sleep, parseCookies } from '@/helpers/utils'
 import { ensureDirectoryExists } from '@/helpers/filesystem'
+
+import {
+  verbose,
+  error,
+  warn
+} from "@/helpers/logger";
 
 export const config = {
   api: {
@@ -24,20 +30,16 @@ async function getUserTwitchData(access_token: string): Promise<any> {
   });
 
   const response = await fetch('https://api.twitch.tv/helix/users', { headers });
-  if (!response.ok) throw new Error('Failed to get user ID');
+  if (!response.ok) {
+    error(`(/api/callback) Failed to get user ID`)
+    throw new Error('Failed to get user ID')
+  };
   const { data } = await response.json();
-  if (!data || data.length === 0) throw new Error('No user data returned');
+  if (!data || data.length === 0) {
+    error(`(/api/callback) No user data returned`)
+    throw new Error('No user data returned');
+  }
   return data[0];
-}
-
-function parseCookies(req: NextApiRequest) {
-  const rawCookies = req.headers.cookie?.split('; ') || []
-  const parsedCookies: { [key: string]: string } = {}
-  rawCookies.forEach(rawCookie => {
-    const [key, value] = rawCookie.split('=')
-    parsedCookies[key] = value
-  })
-  return parsedCookies
 }
 
 export default async function handler(
@@ -47,8 +49,12 @@ export default async function handler(
   try {
     const { access_token } = parseCookies(req);
     const user = await getUserTwitchData(access_token);
-    if (!user) throw new Error('No user data returned');
+    if (!user) {
+      error(`(/api/download) No user data returned`)
+      throw new Error('No user data returned');
+    }
 
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
     if (req.method === 'POST') {
       const selectedClips: ClipDataResponse[] = req.body;
       const errors: string[] = [];
@@ -58,6 +64,7 @@ export default async function handler(
       res.setHeader('Connection', 'keep-alive');
       res.setHeader("Content-Encoding", "none");
 
+      verbose(`Downloading clips for user ${user.display_name} (${user.id})`);
       res.write('data: {"status": "start", "type": "clips"}\n\n');
 
       const maxClips = parseInt(process.env.MAX_CLIPS_DOWNLOAD || '10');
@@ -81,7 +88,7 @@ export default async function handler(
           }
           res.write(`data: ${JSON.stringify(resp)}\n\n`);
         } catch (e: any) {
-          console.error(`Failed to download clip ${clip.id}`, e);
+          error(`Failed to download clip ${clip.id}: ${e}`);
           const resp = {
             id: clip.id,
             status: 'error',
@@ -136,7 +143,7 @@ export default async function handler(
         // send the zip file to the user as a download
         res.write('data: {"status": "done", "type": "final"}\n\n');
         res.end();
-        console.log('Archive wrote %d bytes', archive.pointer());
+        verbose(`Archive wrote ${archive.pointer()} bytes`);
 
         // delete all clips
         for (const clip of selectedClips) {
@@ -187,10 +194,11 @@ export default async function handler(
         fs.unlinkSync(zipFilePath);
       });
     } else {
+      warn(`(/api/download) Method not allowed for ${ip}`);
       res.status(405).json({ message: 'Method not allowed' })
     }
   } catch (e: any) {
-    console.error('Failed to download clips', e);
+    error(`Failed to download clips: ${e}`);
     // clear cookies and redirect to login
     res.status(500).json({ message: e.message });
   }

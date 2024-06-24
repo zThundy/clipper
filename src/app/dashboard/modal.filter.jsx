@@ -1,25 +1,31 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-import { Modal, Grid, Divider, Typography, TextField } from '@mui/material';
+import { Modal, Grid, Divider, Typography, TextField, Button, FormControl, Select, MenuItem } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import moment from 'moment';
 
 import style from "./modal.filter.module.css";
-import { useEffect } from 'react';
-import { Warning } from '@mui/icons-material';
+import { Check, Close, Delete, Warning } from '@mui/icons-material';
 
-function ModalFilter({ open, onClose }) {
+function ModalFilter({ open, onClose, filterApplied, clips }) {
+  const [errored, setErrored] = useState(false);
+
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState('');
+  const [authorList, setAuthorList] = useState([]);
+  const [type, setType] = useState("clips");
 
   useEffect(() => {
     const _startDate = localStorage.getItem("startDate");
     const _endDate = localStorage.getItem("endDate");
 
-    console.log(_startDate, _endDate)
-    console.log(moment(_startDate).isValid(), moment(_endDate).isValid())
+    // console.log(_startDate, _endDate)
+    // console.log(moment(_startDate).isValid(), moment(_endDate).isValid())
 
     // check with moment if the date is valid
     if (moment(_startDate).isValid()) setStartDate(moment(_startDate));
@@ -28,6 +34,60 @@ function ModalFilter({ open, onClose }) {
     if (moment(_endDate).isValid()) setEndDate(moment(_endDate));
     else setEndDate(null);
   }, [])
+
+  useEffect(() => {
+    let _authorList = clips.map(clip => clip.creator_name);
+    // remove duplicates
+    _authorList = [...new Set(_authorList)];
+    setAuthorList(_authorList);
+    // console.log("_authorList", _authorList)
+  }, [clips])
+
+  const handleChange = (event) => {
+    setAuthor(event.target.value);
+  };
+
+  const handleTypeChange = (event) => {
+    setType(event.target.value);
+  }
+
+  const applyFilters = () => {
+    if (errored) return;
+
+    const filters = {
+      startDate: startDate,
+      endDate: endDate,
+      title: title,
+      author: author,
+      type: type
+    }
+
+    localStorage.setItem("filters", JSON.stringify(filters));
+  }
+
+  const clearFilters = () => {
+    setStartDate(null);
+    setEndDate(null);
+    setTitle("");
+    setAuthor("");
+    setType("clips");
+    localStorage.removeItem("filters");
+    localStorage.removeItem("startDate");
+    localStorage.removeItem("endDate");
+  }
+
+  useEffect(() => {
+    // check if errored
+    if (startDate && endDate && startDate > endDate) {
+      setErrored(true);
+    } else {
+      setErrored(false);
+    }
+
+    if (type !== "clips" && type !== "video") {
+      setType("clips");
+    }
+  }, [startDate, endDate, title, author, type])
 
   return (
     <Modal open={open} onClose={onClose} className={style.modal}>
@@ -57,7 +117,7 @@ function ModalFilter({ open, onClose }) {
             <p>For a more accurate filtering experience, please scroll through as many pages as possible so that we can create a cache of your clips.<br /> If you want to delete your cache, you can do it from the settings.</p>
           </div>
         </Grid>
-        <Grid item xs={6} className={style.datePickerContainer}>
+        <Grid item xs={4} className={style.datePickerContainer}>
           <Typography
             style={{
               fontSize: "2.5rem",
@@ -78,7 +138,7 @@ function ModalFilter({ open, onClose }) {
             renderInput={(params) => <input {...params} />}
           />
         </Grid>
-        <Grid item xs={6} className={style.datePickerContainer}>
+        <Grid item xs={4} className={style.datePickerContainer}>
           <Typography
             style={{
               fontSize: "2.5rem",
@@ -91,13 +151,41 @@ function ModalFilter({ open, onClose }) {
             views={['year', 'month', 'day']}
             fixedWeekNumber={5}
             value={endDate}
+            minDate={startDate}
+            onError={(reason) => {
+              setErrored(true);
+            }}
             onChange={(value) => {
               // console.log(value);
+              setErrored(false);
               setEndDate(value);
               localStorage.setItem("endDate", value);
             }}
             renderInput={(params) => <input {...params} />}
           />
+        </Grid>
+        <Grid item xs={4} className={style.datePickerContainer}>
+          <Typography
+            style={{
+              fontSize: "2.5rem",
+            }}
+          >
+            Type
+          </Typography>
+          <FormControl
+            sx={{
+              width: "60%"
+            }}
+          >
+            <Select
+              value={type}
+              onChange={handleTypeChange}
+            >
+              {/* <MenuItem value="all">All</MenuItem> */}
+              <MenuItem value="video">Video</MenuItem>
+              <MenuItem value="clips">Clips</MenuItem>
+            </Select>
+          </FormControl>
         </Grid>
         <Grid item xs={12} sx={{
           margin: "3rem 0"
@@ -108,20 +196,100 @@ function ModalFilter({ open, onClose }) {
             }}
           />
         </Grid>
-        <Grid item xs={12} className={style.datePickerContainer}>
-          <Typography
-            style={{
-              fontSize: "2.5rem",
-            }}
+        <Grid item xs={12}>
+          <Grid
+            container
+            justifyContent="space-between"
+            alignContent="center"
           >
-            Title
-          </Typography>
-          <TextField
-            variant="outlined"
-            fullWidth
-            color="primary"
-            className={style.textField}
-          />
+            <Grid item xs={5.8} className={style.datePickerContainer}>
+              <Typography
+                style={{
+                  fontSize: "2.5rem",
+                }}
+              >
+                Title
+              </Typography>
+              <TextField
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                variant="outlined"
+                fullWidth
+                color="primary"
+                className={style.textField}
+              />
+            </Grid>
+            <Grid item xs={5.8} className={style.datePickerContainer}>
+              <Typography
+                style={{
+                  fontSize: "2.5rem",
+                }}
+              >
+                Author
+              </Typography>
+              <FormControl fullWidth>
+                <Select
+                  value={author}
+                  onChange={handleChange}
+                >
+                  {
+                    authorList.map((author, index) => (
+                      <MenuItem key={index} value={author}>{author}</MenuItem>
+                    ))
+                  }
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          alignContent="flex-end"
+        >
+          <Grid
+            container
+            justifyContent="end"
+          >
+            <Grid
+              item
+              xs={2}
+              justifyContent="center"
+              alignContent="center"
+              textAlign="center"
+            >
+              <Button
+                variant="contained"
+                color={errored ? "error" : "success"}
+                // disabled={errored}
+                startIcon={errored ? <Close /> : <Check />}
+                disableElevation
+                onClick={applyFilters}
+                // classess={{ disabled: buttonStyle.disabledButton }}
+                sx={{ margin: "2rem 0" }}
+              >
+                Apply
+              </Button>
+            </Grid>
+            <Grid
+              item
+              xs={2}
+              justifyContent="center"
+              alignContent="center"
+              textAlign="center"
+            >
+              <Button
+                variant="contained"
+                color="warning"
+                startIcon={<Delete />}
+                disableElevation
+                onClick={clearFilters}
+                sx={{ margin: "2rem 0" }}
+              >
+                Reset
+              </Button>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </Modal>

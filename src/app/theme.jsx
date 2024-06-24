@@ -4,6 +4,7 @@ import {
   createTheme,
   experimental_extendTheme as extendTheme
 } from '@mui/material/styles';
+// import { buttonClasses } from "@mui/material/Button";
 
 const augment = createTheme({});
 const theme = extendTheme({
@@ -41,6 +42,13 @@ const theme = extendTheme({
       contrastText: 'rgb(255, 255, 255)',
       light: 'rgb(153, 0, 255)',
       dark: 'rgb(153, 0, 255)'
+    },
+    action: {
+      active: 'rgb(255, 255, 255)',
+      // hover: 'rgb(255, 255, 255)',
+      selected: 'rgb(255, 255, 255)',
+      disabled: 'rgb(255, 255, 255)',
+      selectedOpacity: '0.8',
     }
   },
   typography: {
@@ -48,6 +56,9 @@ const theme = extendTheme({
       textTransform: 'none'
     }
   },
+  disabledButton: ({ theme }) => ({
+    backgroundColor: theme.vars.palette.error.main
+  }),
   components: {
     MuiButton: {
       styleOverrides: {
@@ -60,7 +71,7 @@ const theme = extendTheme({
           fontWeight: "bold",
           fontSize: "1.2rem",
           // borderRadius: "2rem",
-          padding: "1rem 2rem 1rem 2rem",
+          // padding: "1rem 2rem 1rem 2rem",
           // transition: "border-radius .2s, color .2s",
           // "&:hover": {
           //   backgroundColor: theme.vars.palette.primary.light,
@@ -73,10 +84,11 @@ const theme = extendTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           color: theme.vars.palette.text.main,
-          borderRadius: '2px',
-          borderWidth: '1px',
+          // borderRadius: '2px',
+          // borderWidth: '1px',
+          // border: '1px solid',
+          border: "none",
           borderColor: theme.vars.palette.text.main,
-          border: '1px solid',
           fontWeight: 'bold',
           backgroundColor: theme.vars.palette.background.main,
 
@@ -102,6 +114,9 @@ const theme = extendTheme({
           color: theme.vars.palette.secondary.main,
           fontWeight: 'bold',
         }),
+        disabled: ({ theme }) => ({
+          color: theme.vars.palette.text.darkgray,
+        }),
       }
     },
     MuiPickersDay: {
@@ -123,6 +138,11 @@ const theme = extendTheme({
             borderRadius: '50%',
             border: '2px solid ' + theme.vars.palette.primary.main,
           },
+          "&.Mui-disabled": {
+            color: theme.vars.palette.text.main + " !important",
+            opacity: ".4"
+            // backgroundColor: theme.vars.palette.background.light,
+          },
         }),
       }
     },
@@ -137,18 +157,32 @@ const theme = extendTheme({
         }),
       }
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          // borderColor: theme.vars.palette.text.main,
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderRadius: '2px',
+        }),
+      }
+    },
     MuiInputBase: {
       styleOverrides: {
         root: ({ theme }) => ({
           color: theme.vars.palette.text.main,
-          borderColor: theme.vars.palette.text.main,
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          borderRadius: '2px',
+          // borderColor: theme.vars.palette.text.main,
+          // borderWidth: '1px',
+          // borderStyle: 'solid',
+          // borderRadius: '2px',
           backgroundColor: theme.vars.palette.background.main,
           "&.Mui-focused": {
             border: "none"
           },
+        }),
+        error: ({ theme }) => ({
+          color: theme.vars.palette.error.main,
+          borderColor: theme.vars.palette.error.main,
         }),
         input: ({ theme }) => ({
           color: theme.vars.palette.text.main,
@@ -166,7 +200,31 @@ const theme = extendTheme({
           color: theme.vars.palette.text.main,
         }),
       }
-    }
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          border: "none"
+        }),
+      }
+    },
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          // color: theme.vars.palette.text.main,
+          // backgroundColor: theme.vars.palette.background.main,
+        }),
+      }
+    },
+    MuiList: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          backgroundColor: theme.vars.palette.background.main,
+          color: theme.vars.palette.text.main,
+          // maxHeight: '20rem',
+        }),
+      }
+    },
   }
 });
 

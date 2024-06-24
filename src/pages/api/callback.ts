@@ -6,19 +6,29 @@ type ResponseData = {
   message?: string
 }
 
+import {
+  exists,
+  deleteFile,
+} from '@/helpers/filesystem';
+
+import {
+  verbose,
+  error,
+  warn
+} from "@/helpers/logger";
+import { appPath } from '@/helpers/utils'
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
   if (req.method === 'GET') {
-    // console.log('req.headers.host', req.headers.host)
-    // console.log('req.query.code', req.query.code)
-
     const protocol = req.headers['x-forwarded-proto'] || 'http'
     const code = req.query.code as string
 
     if (!code) {
-      // res.status(400).json({ message: 'Authorization code is required' });
+      warn(`(/api/callback) Authorization code is required for ${ip}`);
       res.status(308).redirect('/');
       return
     }
@@ -41,6 +51,7 @@ export default async function handler(
       })
 
       if (!response.ok) {
+        error(`(/api/callback) Failed to exchange authorization code for access token for ${ip}`);
         throw new Error('Failed to exchange authorization code for access token')
       }
 
@@ -57,13 +68,29 @@ export default async function handler(
         `user_data=${encodeURIComponent(JSON.stringify(data))}; Path=/; HttpOnly; Expires=${new Date('9999-12-31T23:59:59Z').toUTCString()}`
       ])
 
+      verbose(`(/api/callback) Successfully exchanged authorization code for access token for ${data.display_name} (${data.id}) from ${ip}`);
+
+      const cachePath = appPath(`cache/${data.id}.json`);
+      // delete cached data for the user that logged in (if any)
+      if (await exists(appPath(cachePath))) {
+        verbose(`(/api/callback) Deleting cache for ${data.display_name} (${data.id}) from ${ip}`);
+        await deleteFile(appPath(cachePath));
+      }
+
+      const clipsCachePath = appPath(`cache/${data.id}_clips.json`);
+      if (await exists(appPath(clipsCachePath))) {
+        verbose(`(/api/callback) Deleting clips cache for ${data.display_name} (${data.id}) from ${ip}`);
+        await deleteFile(appPath(clipsCachePath));
+      }
+
       // redirect to the dashboard
-      res.redirect('/dashboard')
+      res.redirect('/dashboard');
     } catch (error: any) {
       console.log('error', error)
       res.status(500).json({ message: error.message })
     }
   } else {
+    warn(`(/api/callback) Method not allowed for ${ip}`);
     res.status(405).json({ message: 'Method not allowed' })
   }
 }
@@ -75,8 +102,14 @@ async function getUserTwitchData(access_token: string): Promise<any> {
   });
 
   const response = await fetch('https://api.twitch.tv/helix/users', { headers });
-  if (!response.ok)  throw new Error('Failed to get user ID');
+  if (!response.ok) {
+    error(`(/api/callback) Failed to get user ID`)
+    throw new Error('Failed to get user ID')
+  };
   const { data } = await response.json();
-  if (!data || data.length === 0)  throw new Error('No user data returned');
+  if (!data || data.length === 0) {
+    error(`(/api/callback) No user data returned`)
+    throw new Error('No user data returned');
+  }
   return data[0];
 }

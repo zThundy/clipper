@@ -2,6 +2,7 @@ import path from 'path';
 import * as fns from 'date-fns';
 import { differenceInMinutes, format } from 'date-fns';
 import { Period } from './types';
+import { NextApiRequest } from 'next';
 
 const SPLIT_FACTOR = 2;
 const CLIP_ID_REGEX = /\.tv\/(.+?)(?:\?|$)/;
@@ -157,4 +158,14 @@ export function iterable(obj: any): boolean {
     }
 
     return typeof obj[Symbol.iterator] === 'function';
+}
+
+export function parseCookies(req: NextApiRequest) {
+    const rawCookies = req.headers.cookie?.split('; ') || []
+    const parsedCookies: { [key: string]: string } = {}
+    rawCookies.forEach(rawCookie => {
+        const [key, value] = rawCookie.split('=')
+        parsedCookies[key] = value
+    })
+    return parsedCookies
 }

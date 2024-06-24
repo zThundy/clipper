@@ -8,6 +8,10 @@ import {
     readFile,
 } from "./filesystem"
 
+import {
+    verbose as log
+} from "./logger";
+
 import fs from 'fs';
 
 let caches: Cache = {};
@@ -20,15 +24,15 @@ export function create(id: string, path?: string | null): void {
     }
 
     if (!caches[id]) {
-        console.warn(`Cache ${id} does not exist, creating it...`);
+        log(`Cache ${id} does not exist, creating it...`);
         // check if cache exists on disk first
         try {
             const data = fs.readFileSync(cachesMetadata[id].path, 'utf8');
             caches[id] = JSON.parse(data);
-            console.log(`Cache ${id} loaded from disk`)
+            log(`Cache ${id} loaded from disk`)
         } catch (e) {
             caches[id] = [];
-            console.log(`Cache ${id} created`)
+            log(`Cache ${id} created`)
         }
     }
 }
@@ -79,14 +83,14 @@ export function saveAll(): void {
 
 export function dump(id?: string | undefined | null): void {
     if (id) {
-        console.log(`Cache ${id}:`);
-        console.log(caches[id]);
+        log(`Cache ${id}:`);
+        log(caches[id]);
         return;
     }
 
     Object.keys(caches).forEach((id) => {
-        console.log(`Cache ${id}:`);
-        console.log(caches[id]);
+        log(`Cache ${id}:`);
+        log(caches[id]);
     });
 }
 

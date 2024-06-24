@@ -1,9 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiRequest, NextApiResponse } from 'next';
 
 import {
     parseCookies
 } from '@/helpers/utils';
-
 
 export default async function handler(
     req: NextApiRequest,

@@ -183,7 +183,7 @@ function Dashboard({ }) {
           </Alert>
         </Snackbar>
 
-        <ModalFilterContent open={openFilterModal} onClose={() => setOpenFilterModal(false)} />
+        <ModalFilterContent open={openFilterModal} onClose={() => setOpenFilterModal(false)} clips={clips} />
         <ModalClipContent clip={modalData} setModalData={setModalData} />
         <ModalDownloadContent open={clipsDownload} selectedClips={selectedClips} setClipsDownload={setClipsDownload} setErrorMessage={(message) => {
           setNotifType("error");

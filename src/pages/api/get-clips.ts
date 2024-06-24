@@ -34,7 +34,8 @@ import {
     Period,
     ClipRequest,
     AuthData,
-    Dict
+    Dict,
+    Filters
 } from '@/helpers/types'
 
 export default async function handler(
@@ -71,8 +72,13 @@ export default async function handler(
         // get created_at from user_data
         const { created_at, id } = JSON.parse(decodeURIComponent(user_data)) as Dict<string>;
 
-        const filters = JSON.parse(decodeURIComponent(f as string)) as Dict<string>;
-        const { startDate: left, endDate: right } = filters;
+        let filters: Filters | null | undefined = null;
+        let left, right;
+        if (f) {
+            filters = JSON.parse(decodeURIComponent(f as string)) as Filters;
+            left = filters?.startDate;
+            right = filters?.endDate;
+        }
 
         // create base period
         let period: Period = { left: new Date(), right: new Date() };
@@ -130,7 +136,8 @@ export default async function handler(
     }
 }
 
-function sortClips(data: ClipDataResponse[], filters: Dict<string>): ClipDataResponse[] {
+function sortClips(data: ClipDataResponse[], filters: Filters | null): ClipDataResponse[] {
+    if (!filters) return data;
     const { author, startDate, endDate, title, sortBy } = filters;
 
     // log(`Filtering clips by author: ${author}, startDate: ${startDate}, endDate: ${endDate}, title: ${title}`)

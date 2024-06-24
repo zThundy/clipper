@@ -83,8 +83,13 @@ function Dashboard({ }) {
   const [openFilterModal, setOpenFilterModal] = useState(false);
 
   const fetchClips = (localFilters) => {
+    const parameters = new URLSearchParams();
+    if (localFilters) { parameters.append("filters", JSON.stringify(localFilters)); }
+    if (!localFilters && selectedFilters) { parameters.append("filters", JSON.stringify(selectedFilters)); }
+    parameters.append("currentPage", currentPage);
+
     // get the clips on page load using the api call /api/get-clips
-    fetch(`/api/get-clips?currentPage=${currentPage}&filters=${localFilters ? JSON.stringify(localFilters) : JSON.stringify(selectedFilters)}`)
+    fetch(`/api/get-clips?${parameters.toString()}`)
       .then(async res => {
         if (!res.ok) throw await res.json();
         return res.json();
@@ -130,10 +135,11 @@ function Dashboard({ }) {
     const filters = localStorage.getItem("filters");
     console.log(filters);
     setSelectedFilters(() => {
-      if (!filters) return false;
-      if (!openFilterModal) fetchClips(JSON.parse(filters));
-      return JSON.parse(filters);
+      const _filters = filters ? JSON.parse(filters) : {}
+      if (!openFilterModal) fetchClips(_filters);
+      return _filters;
     });
+    // if (!filters) fetchClips();
   }, [openFilterModal]);
 
   const handleClose = (e, reason) => {

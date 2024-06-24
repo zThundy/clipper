@@ -20,6 +20,15 @@ export type ClipDataResponse = {
     thumbnail_url: string
 }
 
+export type Filters = {
+    startDate: string,
+    endDate: string,
+    title: string,
+    duration: number,
+    sortBy: string,
+    author: string,
+}
+
 export type ClipData = {
     // Define the type of your clip data here
     data: ClipDataResponse[]

@@ -68,7 +68,9 @@ export type Cache = {
 export type CacheMetadata = {
     [key: string]: {
         path: string,
-    }
+        created: Date | string,
+        expire: Date | string
+    } | any
 };
 
 export interface YoutubeDlClipDump {

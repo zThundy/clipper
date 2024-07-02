@@ -45,8 +45,8 @@ export function create(id: string, path?: string | null): void {
             error(e as any);
             const createDate = new Date().toISOString();
             // ad 1 week to the current date
-            // const expireDate = new Date(new Date().getTime() + expireCache * 24 * 60 * 60 * 1000).toISOString();
-            const expireDate = new Date(new Date().getTime() + expireCache * 20000).toISOString();
+            const expireDate = new Date(new Date().getTime() + expireCache * 24 * 60 * 60 * 1000).toISOString();
+            // const expireDate = new Date(new Date().getTime() + expireCache * 20000).toISOString();
             cachesMetadata[id] = {
                 path: path || `./cache`,
                 created: createDate,

@@ -69,7 +69,8 @@ export type CacheMetadata = {
     [key: string]: {
         path: string,
         created: Date | string,
-        expire: Date | string
+        expire: Date | string,
+        fileName: string
     } | any
 };
 

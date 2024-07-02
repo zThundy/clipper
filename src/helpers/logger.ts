@@ -40,11 +40,13 @@ export function log(args: any[] | string[] | string): void {
 }
 
 export function warn(args: any[] | string[] | string): void {
+    if (process.env.LOG_LEVEL === 'silent') return;
     console.warn(args);
     writeLog("WARN", args);
 }
 
 export function error(args: any[] | string[] | string): void {
+    if (process.env.LOG_LEVEL === 'silent') return;
     console.error(args);
     writeLog("ERROR", args);
 }

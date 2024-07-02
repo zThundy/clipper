@@ -9,7 +9,9 @@ import {
 } from "./filesystem"
 
 import {
-    verbose as log
+    verbose as log,
+    error,
+    warn
 } from "./logger";
 
 import fs from 'fs';
@@ -24,43 +26,47 @@ export function create(id: string, path?: string | null): void {
         // if cache is expired, reset it
         const expireDate = new Date(cachesMetadata[id].expire);
         const currentDate = new Date();
+        log(`Cache ${id} expire date: ${expireDate}`);
         if (currentDate > expireDate) {
-            log(`Cache ${id} is expired, resetting it...`);
+            warn(`Cache ${id} is expired, resetting it...`);
             deleteCache(id);
+            deleteMetadata(id);
         }
     }
 
     // then attempt to create metadata
-    if (!cachesMetadata[id]) {
-        // ???????????????????????? why in the args then.... idk, i don't care. SEE YA
-        path = `./cache/${id}.json`;
+    if (!cachesMetadata[id] || !cachesMetadata[id].fullPath) {
         try {
             // check if metadata exists on disk first
             const data = fs.readFileSync(`./cache/${id}.meta.json`, 'utf8');
             cachesMetadata[id] = JSON.parse(data);
             log(`Cache ${id} metadata loaded from disk`)
         } catch (e) {
+            error(e as any);
             const createDate = new Date().toISOString();
             // ad 1 week to the current date
-            const expireDate = new Date(new Date().getTime() + expireCache * 24 * 60 * 60 * 1000).toISOString();
+            // const expireDate = new Date(new Date().getTime() + expireCache * 24 * 60 * 60 * 1000).toISOString();
+            const expireDate = new Date(new Date().getTime() + expireCache * 20000).toISOString();
             cachesMetadata[id] = {
-                path,
+                path: path || `./cache`,
                 created: createDate,
-                expire: expireDate
+                expire: expireDate,
+                fileName: id,
+                fullPath: `${path || `./cache`}/${id}.json`
             };
             // save metadata to disk
             const metaPath = `./cache/${id}.meta.json`;
-            writeFile(metaPath, JSON.stringify(caches[id], null, 2), 'utf8');
+            writeFile(metaPath, JSON.stringify(cachesMetadata[id], null, 2), 'utf8');
             log(`Cache ${id} metadata created`)
         }
     }
 
     // then attempt to create cache
-    if (!caches[id]) {
+    if (!caches[id] || !caches[id].length) {
         log(`Cache ${id} does not exist, creating it...`);
         // check if cache exists on disk first
         try {
-            const data = fs.readFileSync(cachesMetadata[id].path, 'utf8');
+            const data = fs.readFileSync(cachesMetadata[id].fullPath, 'utf8');
             caches[id] = JSON.parse(data);
             log(`Cache ${id} loaded from disk`)
         } catch (e) {
@@ -81,16 +87,26 @@ export function set(id: string, path: string | null, data: Cache[string]): void 
 }
 
 export function deleteCache(id: string): void {
-    caches[id] = [];
-    cachesMetadata[id] = {};
-
+    let path = `./cache/${id}.json`;
+    if (!caches[id]) warn(`Cache ${id} metadata does not exist, deleting cache ${id} anyway...`);
     // delete the file if it exists
     try {
-        if (fs.existsSync(cachesMetadata[id].path)) {
-            fs.unlinkSync(cachesMetadata[id].path);
-        }
+        caches[id] = [];
+        fs.unlinkSync(path);
     } catch (e) {
-        console.error(e);
+        error(e as any);
+    }
+}
+
+export function deleteMetadata(id: string): void {
+    let path = `./cache/${id}.meta.json`;
+    if (!cachesMetadata[id]) warn(`Cache ${id} metadata does not exist, deleting cache metadata ${id} anyway...`);
+    // delete the file if it exists
+    try {
+        cachesMetadata[id] = {};
+        fs.unlinkSync(path);
+    } catch (e) {
+        error(e as any);
     }
 }
 
@@ -99,12 +115,16 @@ function getMetadata(id: string): CacheMetadata[string] {
 }
 
 export async function reset(id: string): Promise<void> {
-    const meta = getMetadata(id);
-    // clear and read from file
-    caches[id] = [];
-    // read from file
-    const data = await readFile(meta.path, 'utf8');
-    caches[id] = JSON.parse(data);
+    try {
+        const meta = getMetadata(id);
+        // clear and read from file
+        caches[id] = [];
+        // read from file
+        const data = await readFile(meta.fullPath, 'utf8');
+        caches[id] = JSON.parse(data);
+    } catch (e) {
+        error(e as any);
+    }
 }
 
 export function add(id: string, page: string, data: string): void {
@@ -113,13 +133,17 @@ export function add(id: string, page: string, data: string): void {
 }
 
 export async function save(id: string): Promise<void> {
+    log(`Saving cache ${id}...`)
     const meta = getMetadata(id);
+    log(`Cache ${id} metadata: ${JSON.stringify(meta)}`);
     await writeFile
-        (meta.path, JSON.stringify(caches[id], null, 2), 'utf8');
+        (meta.fullPath, JSON.stringify(caches[id], null, 2), 'utf8');
+    log(`Cache ${id} saved to disk`)
 }
 
 export function saveAll(): void {
     Object.keys(caches).forEach((id) => {
+        // log(`Saving cache ${id}...`)
         save(id);
     });
 }

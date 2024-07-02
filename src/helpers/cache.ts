@@ -18,7 +18,7 @@ import fs from 'fs';
 
 let caches: Cache = {};
 let cachesMetadata: CacheMetadata = {};
-const expireCache: number = Number(process.env.CACHE_MAX_LIFETIME);
+const expireCache: number = Number(process.env.CACHE_MAX_LIFETIME_DAYS);
 
 export function create(id: string, path?: string | null): void {
     // check if cache is expired
@@ -43,6 +43,7 @@ export function create(id: string, path?: string | null): void {
             log(`Cache ${id} metadata loaded from disk`)
         } catch (e) {
             error(e as any);
+            log(`Cache ${id} metadata does not exist, creating it...`);
             const createDate = new Date().toISOString();
             // ad 1 week to the current date
             const expireDate = new Date(new Date().getTime() + expireCache * 24 * 60 * 60 * 1000).toISOString();
@@ -111,15 +112,16 @@ export function deleteMetadata(id: string): void {
 }
 
 function getMetadata(id: string): CacheMetadata[string] {
+    cachesMetadata[id].created = new Date(cachesMetadata[id].created);
+    cachesMetadata[id].expire = new Date(cachesMetadata[id].expire);
     return cachesMetadata[id];
 }
 
 export async function reset(id: string): Promise<void> {
     try {
-        const meta = getMetadata(id);
         // clear and read from file
-        caches[id] = [];
-        // read from file
+        deleteCache(id);
+        const meta = getMetadata(id);
         const data = await readFile(meta.fullPath, 'utf8');
         caches[id] = JSON.parse(data);
     } catch (e) {
@@ -136,8 +138,7 @@ export async function save(id: string): Promise<void> {
     log(`Saving cache ${id}...`)
     const meta = getMetadata(id);
     log(`Cache ${id} metadata: ${JSON.stringify(meta)}`);
-    await writeFile
-        (meta.fullPath, JSON.stringify(caches[id], null, 2), 'utf8');
+    await writeFile(meta.fullPath, JSON.stringify(caches[id], null, 2), 'utf8');
     log(`Cache ${id} saved to disk`)
 }
 

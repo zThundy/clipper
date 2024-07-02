@@ -76,9 +76,12 @@ export default async function handler(
         let left, right;
         if (f) {
             filters = JSON.parse(decodeURIComponent(f as string)) as Filters;
+            verbose(`Filters: ${JSON.stringify(filters)}`)
             left = filters?.startDate;
             right = filters?.endDate;
+            verbose(`Left: ${left}, Right: ${right}`)
         }
+
 
         // create base period
         let period: Period = { left: new Date(), right: new Date() };
@@ -93,9 +96,9 @@ export default async function handler(
             const sorted = sortClips(data, filters);
             verbose(`Sending ${sorted.length} clips for ${id}, ip: ${ip}...`)
             res.status(200).json(sorted as any);
-        } catch (error: any) {
-            error(`Failed to get clips for ${id}, ip: ${ip}`, error);
-            if (error.message === 'Access token expired') {
+        } catch (e: any) {
+            error(`Failed to get clips for ${id}, ip: ${ip} error: ${e}`);
+            if (e.message === 'Access token expired') {
                 // The access token is expired, use the refresh token to get a new one
                 const newAccessToken = await refreshAccessToken(refresh_token);
 
@@ -116,7 +119,7 @@ export default async function handler(
                 res.setHeader('Set-Cookie', `refresh_token=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT`);
                 res.setHeader('Set-Cookie', `user_data=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT`);
 
-                error(`Failed to get clips for ${id}, ip: ${ip}`, error);
+                error(`Failed to get clips for ${id}, ip: ${ip} error: ${e}`);
                 res.status(500).json({
                     type: "error",
                     redirect: true,
@@ -316,6 +319,7 @@ async function getAllClips(auth: AuthData, period: Period, currentPage: number):
 async function paginate(auth: AuthData, period: Period, cursor: string | undefined | null): Promise<ClipData | false> {
     try {
         const { left, right } = period;
+        verbose(`Paginating for ${auth.user_id} cursor: ${cursor} left: ${left} right: ${right}`);
 
         return await clips(auth, {
             broadcaster_id: auth.user_id,
@@ -335,6 +339,8 @@ async function paginate(auth: AuthData, period: Period, cursor: string | undefin
 }
 
 async function clips(auth: AuthData, req: ClipRequest): Promise<ClipData> {
+    verbose(`Fetching clips for ${auth.user_id}, request: ${JSON.stringify(req)}`)
+
     const headers = new Headers({
         'Authorization': `Bearer ${auth.access_token}`,
         'Client-Id': process.env.TWITCH_CLIENT_ID || '',
